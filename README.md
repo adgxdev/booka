@@ -1,4 +1,3 @@
-```markdown
 # 📚 Booka
 
 **Booka** is a digital textbook ordering and delivery platform designed for Nigerian universities. It streamlines the process of searching, purchasing, and receiving textbooks, while providing administrative tools for schools and logistics tracking for delivery agents.
