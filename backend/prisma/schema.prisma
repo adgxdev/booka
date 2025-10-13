@@ -13,3 +13,30 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Manager {
+  id          String   @id @default(uuid())
+  commissions Int
+  lastUpdate  DateTime
+
+  admin Admin[]
+}
+
+model Admin {
+  id    String    @id @default(uuid())
+  name  String
+  email String
+  role  AdminRole @default(manager)
+
+  manager   Manager? @relation(fields: [managerId], references: [id])
+  managerId String?
+
+  password  String
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+}
+
+enum AdminRole {
+  manager
+  super
+}
