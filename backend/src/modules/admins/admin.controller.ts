@@ -233,3 +233,29 @@ export const refreshAdminToken = async (req: Request, res: Response, next: NextF
         return next(error);
     }
 };
+
+export const logoutAdmin = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const isProduction = process.env.NODE_ENV === "production";
+        
+        // Clear the cookies with consistent settings
+        res.clearCookie("adminAccessToken", {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "lax"
+        });
+        
+        res.clearCookie("adminRefreshToken", {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "lax"
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "Logged out successfully"
+        });
+    } catch (error) {
+        return next(error);
+    }
+}
