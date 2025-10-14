@@ -44,7 +44,7 @@ export function getPatientWelcomeEmail({ full_name, email, password }: { full_na
     <div style="font-family: Arial, sans-serif;">
       <h2>Welcome to ${orgName}</h2>
       <p>Hello <strong>${full_name}</strong>,</p>
-      <p>You have been registered as a patient on <b>${orgName}</b>.</p>
+      <p>You have been registered as an admin on <b>${orgName}</b>.</p>
       <p><b>Your login email:</b> ${email}<br/>
          <b>Your temporary password:</b> <span style="font-family:monospace;">${password}</span></p>
       <p>Please log in and change your password as soon as possible.</p>

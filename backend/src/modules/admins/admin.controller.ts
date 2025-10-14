@@ -44,7 +44,11 @@ export const createAdmin = async (req: Request, res: Response, next: NextFunctio
                 await sendCustomEmail({ to: email, ...emailContent });
             }
 
-            return res.status(201).json({message: "Admin created successfully", admin: newAdmin});
+            return res.status(201).json({
+                success: true,
+                message: "Admin created successfully", 
+                admin: newAdmin
+            });
         }
     } catch (error) {
         next(error);
