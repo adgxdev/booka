@@ -21,27 +21,6 @@ async function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function withDbRetry<T>(fn: () => Promise<T>, attempts = 10, baseDelayMs = 250): Promise<T> {
-    let lastErr: any;
-    for (let i = 0; i < attempts; i++) {
-        try {
-            return await fn();
-        } catch (err: any) {
-            const code = err?.code;
-            const msg: string = typeof err?.message === 'string' ? err.message : '';
-            const isConnIssue = code === 'P1001' || msg.includes("Can't reach database server");
-            const isLast = i === attempts - 1;
-            if (!isConnIssue || isLast) throw err;
-            const delay = baseDelayMs * (i + 1); // linear backoff
-            // eslint-disable-next-line no-console
-            console.warn(`[DB Retry] Attempt ${i + 1} failed (code: ${code || 'n/a'}). Retrying in ${delay}ms...`);
-            await sleep(delay);
-            lastErr = err;
-        }
-    }
-    throw lastErr;
-}
-
 //Create admin
 export const createAdmin = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -49,11 +28,9 @@ export const createAdmin = async (req: Request, res: Response, next: NextFunctio
         const { name, email, phoneNumber } = req.body;
         const password = generateRandomPassword();
 
-        const existingAdmin = await withDbRetry(() =>
-            prisma.admin.findUnique({
+        const existingAdmin = await prisma.admin.findUnique({
                 where: { email }
-            })
-        );
+            });
 
         if (existingAdmin) {
             return res.status(400).json({
@@ -64,8 +41,7 @@ export const createAdmin = async (req: Request, res: Response, next: NextFunctio
 
         if (!existingAdmin) {
             const hashedPassword = await bcrypt.hash(password, 10);
-            const newAdmin = await withDbRetry(() =>
-                prisma.admin.create({
+            const newAdmin = await prisma.admin.create({
                     data: {
                         name,
                         email,
@@ -82,8 +58,7 @@ export const createAdmin = async (req: Request, res: Response, next: NextFunctio
                         createdAt: true,
                         updatedAt: true
                     }
-                })
-            );
+                });
 
             if (newAdmin) {
                 // Send email with credentials
@@ -110,9 +85,7 @@ export const loginAdmin = async (req: Request, res: Response, next: NextFunction
             return next(new ValidationError("Email and password are required"));
         }
 
-        const admin = await withDbRetry(() =>
-            prisma.admin.findUnique({ where: { email } })
-        );
+        const admin = await prisma.admin.findUnique({ where: { email } });
 
         if (!admin) {
             return next(new AuthError("Admin does not exist"));
