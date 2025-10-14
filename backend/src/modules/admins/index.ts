@@ -6,7 +6,7 @@ const router:Router = express.Router();
 
 router.post("/create-admin", isSuperAuthenticated, createAdmin);
 router.post("/login-admin", loginAdmin)
-router.post("/reset-password", isAnyAdminAuthenticated, resetAdminPassword)
+router.post("/reset-admin-password", isAnyAdminAuthenticated, resetAdminPassword)
 router.post("/refresh-token", refreshAdminToken)
 router.get("/logout-admin", logoutAdmin)
 
