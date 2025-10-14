@@ -6,6 +6,7 @@ import { sendCustomEmail, getPatientWelcomeEmail } from '../../utils/send-email'
 import bcrypt from "bcryptjs";
 import { AuthError, ValidationError } from "../../packages/error-handler";
 import { setCookie } from "../../utils/cookies/setCookies";
+import { AdminJwtPayload } from "./admin.type";
 
 function generateRandomPassword(length = 8) {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -22,6 +23,16 @@ export const createAdmin = async (req: Request, res: Response, next: NextFunctio
     try {
         validateRegistrationData(req.body, "admin");
         const { name, email, phoneNumber } = req.body;
+        // Accept optional role; default to 'manager'. Only allow 'manager' or 'super'.
+        let { role } = req.body as { role?: string };
+        if (role) {
+            const allowed = ["manager", "super"]; 
+            if (!allowed.includes(role)) {
+                return next(new ValidationError("Invalid role. Allowed roles are 'manager' or 'super'"));
+            }
+        } else {
+            role = "manager"; // default
+        }
         const password = generateRandomPassword();
 
         const existingAdmin = await prisma.admin.findUnique({
@@ -38,23 +49,24 @@ export const createAdmin = async (req: Request, res: Response, next: NextFunctio
         if (!existingAdmin) {
             const hashedPassword = await bcrypt.hash(password, 10);
             const newAdmin = await prisma.admin.create({
-                    data: {
-                        name,
-                        email,
-                        password: hashedPassword,
-                        phoneNumber
-                    },
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        phoneNumber: true,
-                        role: true,
-                        managerId: true,
-                        createdAt: true,
-                        updatedAt: true
-                    }
-                });
+                data: {
+                    name,
+                    email,
+                    password: hashedPassword,
+                    phoneNumber,
+                    role: role as any
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    phoneNumber: true,
+                    role: true,
+                    managerId: true,
+                    createdAt: true,
+                    updatedAt: true
+                }
+            });
 
             if (newAdmin) {
                 // Send email with credentials
@@ -110,7 +122,7 @@ export const loginAdmin = async (req: Request, res: Response, next: NextFunction
         const accessToken = jwt.sign(
             {
                 id: admin.id,
-                role: "admin"
+                role: admin.role
             },
             process.env.ACCESS_TOKEN_SECRET as string,
             { expiresIn: "15m" }
@@ -119,7 +131,7 @@ export const loginAdmin = async (req: Request, res: Response, next: NextFunction
         const refreshToken = jwt.sign(
             {
                 id: admin.id,
-                role: "admin"
+                role: admin.role
             },
             process.env.REFRESH_TOKEN_SECRET as string,
             { expiresIn: "7d" }
@@ -137,7 +149,7 @@ export const loginAdmin = async (req: Request, res: Response, next: NextFunction
     }
 }
 
-export const updateAdminPassword = async (req: any, res: Response, next: NextFunction) => {
+export const resetAdminPassword = async (req: any, res: Response, next: NextFunction) => {
     try {
         const { oldPassword, newPassword } = req.body;
 
@@ -176,3 +188,48 @@ export const updateAdminPassword = async (req: any, res: Response, next: NextFun
         next(error);
     }
 }
+
+// Refresh admin token
+export const refreshAdminToken = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const presentedToken = req.cookies["adminRefreshToken"] || req.body.refreshToken;
+        if (!presentedToken) {
+            return res.status(401).json({ message: "Refresh token missing" });
+        }
+
+        let decoded: AdminJwtPayload;
+        try {
+            decoded = jwt.verify(presentedToken, process.env.REFRESH_TOKEN_SECRET!) as AdminJwtPayload;
+        } catch (err) {
+            return res.status(401).json({ message: "Invalid or expired refresh token" });
+        }
+
+        if (!decoded.id || !decoded.role) {
+            return res.status(401).json({ message: "Malformed refresh token" });
+        }
+
+        const admin = await prisma.admin.findUnique({ where: { id: decoded.id } });
+        if (!admin) {
+            return res.status(401).json({ message: "Admin not found" });
+        }
+
+        // Ensure the role in DB matches allowed roles (manager/super)
+        if (admin.role !== "manager" && admin.role !== "super") {
+            return res.status(403).json({ message: "Forbidden: invalid role" });
+        }
+
+        // (Optional future enhancement): rotate refresh token & invalidate old one.
+        const newAccessToken = jwt.sign(
+            { id: admin.id, role: admin.role },
+            process.env.ACCESS_TOKEN_SECRET!,
+            { expiresIn: "15m" }
+        );
+
+        // Maintain consistent cookie naming with login (adminAccessToken)
+        setCookie(res, "adminAccessToken", newAccessToken);
+
+        return res.status(200).json({ message: "Admin access token refreshed", role: admin.role });
+    } catch (error) {
+        return next(error);
+    }
+};
