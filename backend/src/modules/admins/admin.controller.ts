@@ -110,7 +110,9 @@ export const loginAdmin = async (req: Request, res: Response, next: NextFunction
             return next(new ValidationError("Email and password are required"));
         }
 
-        const admin = await prisma.admin.findUnique({ where: { email } });
+        const admin = await withDbRetry(() =>
+            prisma.admin.findUnique({ where: { email } })
+        );
 
         if (!admin) {
             return next(new AuthError("Admin does not exist"));
@@ -159,7 +161,7 @@ export const loginAdmin = async (req: Request, res: Response, next: NextFunction
 
         res.status(200).json({
             message: "Login successful",
-            user: { id: admin.id, name: admin.name, email: admin.email },
+            admin: { id: admin.id, name: admin.name, email: admin.email, role: admin.role },
         })
     } catch (error) {
         return next(error);
