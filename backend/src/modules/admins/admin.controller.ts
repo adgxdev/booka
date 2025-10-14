@@ -136,3 +136,43 @@ export const loginAdmin = async (req: Request, res: Response, next: NextFunction
         return next(error);
     }
 }
+
+export const updateAdminPassword = async (req: any, res: Response, next: NextFunction) => {
+    try {
+        const { oldPassword, newPassword } = req.body;
+
+        if (!oldPassword || !newPassword) {
+            return next(new ValidationError("Old password and new password are required"));
+        }
+
+        if (newPassword.length < 6) {
+            return next(new ValidationError("New password must be at least 6 characters long"));
+        }
+
+        if (oldPassword === newPassword) {
+            return next(new ValidationError("New password must be different from old password"));
+        }
+
+        const adminId = req.admin?.id;
+        if (!adminId) {
+            return next(new AuthError("Unauthorized"));
+        }
+
+        const admin = await prisma.admin.findUnique({ where: { id: adminId } });
+        if (!admin || !admin.password) {
+            return next(new AuthError("Admin not found"));
+        }
+
+        const matches = await bcrypt.compare(oldPassword, admin.password);
+        if (!matches) {
+            return next(new AuthError("Old password is incorrect"));
+        }
+
+        const hashed = await bcrypt.hash(newPassword, 10);
+        await prisma.admin.update({ where: { id: adminId }, data: { password: hashed } });
+
+        return res.status(200).json({ success: true, message: "Password updated successfully" });
+    } catch (error) {
+        next(error);
+    }
+}
