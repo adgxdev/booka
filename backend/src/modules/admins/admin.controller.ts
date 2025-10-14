@@ -259,3 +259,32 @@ export const logoutAdmin = async (req: Request, res: Response, next: NextFunctio
         return next(error);
     }
 }
+
+export const updatePersonalAdminInfo = async (req: any, res: Response, next: NextFunction) => {
+    try {
+        const { name, phoneNumber, email } = req.body;
+        const adminId = req.admin?.id;
+        if (!adminId) {
+            return next(new AuthError("Unauthorized"));
+        }
+
+        if(!name || !phoneNumber || !email) {
+            return next(new AuthError("All fields are required"));
+        }
+
+        const admin = await prisma.admin.findUnique({ where: { id: adminId } });
+        if (!admin) {
+            return next(new AuthError("Admin not found"));
+        }
+
+        const myUpdatedAdmin = await prisma.admin.update({
+            where: { id: adminId },
+            data: { name, phoneNumber, email }
+        })
+          
+
+        return res.status(200).json({ success: true, data: myUpdatedAdmin });
+    } catch (error) {
+        return next(error);
+    }
+}
