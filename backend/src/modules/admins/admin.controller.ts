@@ -21,7 +21,7 @@ async function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function withDbRetry<T>(fn: () => Promise<T>, attempts = 3, baseDelayMs = 250): Promise<T> {
+async function withDbRetry<T>(fn: () => Promise<T>, attempts = 10, baseDelayMs = 250): Promise<T> {
     let lastErr: any;
     for (let i = 0; i < attempts; i++) {
         try {
