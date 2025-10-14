@@ -17,7 +17,7 @@ function generateRandomPassword(length = 8) {
 export const createAdmin = async (req: Request, res: Response, next: NextFunction) => {
     try {
         validateRegistrationData(req.body, "admin");
-        const {name, email, phone_number} = req.body;
+        const {name, email, phoneNumber} = req.body;
         const password = generateRandomPassword();
 
         const existingAdmin = await prisma.admin.findUnique({
@@ -34,7 +34,7 @@ export const createAdmin = async (req: Request, res: Response, next: NextFunctio
                     name,
                     email,
                     password,
-                    phone_number
+                    phoneNumber
                 }
             });
 

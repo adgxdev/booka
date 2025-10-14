@@ -27,7 +27,7 @@ model Admin {
   id           String    @id @default(uuid())
   name         String
   email        String    @unique
-  phone_number String
+  phoneNumber String
   role         AdminRole @default(manager)
 
   manager   Manager? @relation(fields: [managerId], references: [id])
