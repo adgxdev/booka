@@ -16,10 +16,6 @@ function generateRandomPassword(length = 8) {
     return pwd;
 }
 
-// Simple retry helper for transient DB connectivity (e.g., Prisma P1001 with Supabase PgBouncer)
-async function sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 //Create admin
 export const createAdmin = async (req: Request, res: Response, next: NextFunction) => {
