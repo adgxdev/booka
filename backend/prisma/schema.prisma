@@ -25,7 +25,7 @@ model Manager {
 model Admin {
   id    String    @id @default(uuid())
   name  String
-  email String
+  email String    @unique
   role  AdminRole @default(manager)
 
   manager   Manager? @relation(fields: [managerId], references: [id])
@@ -39,4 +39,16 @@ model Admin {
 enum AdminRole {
   manager
   super
+}
+
+enum Entity {
+  admin
+}
+
+model AuditLog {
+  id       String @id @default(uuid())
+  entity   Entity
+  entityId String
+  action   String
+  // university 
 }
