@@ -288,3 +288,21 @@ export const updatePersonalAdminInfo = async (req: any, res: Response, next: Nex
         return next(error);
     }
 }
+
+export const getPersonalAdminInfo = async (req: any, res: Response, next: NextFunction) => {
+    try {
+        const adminId = req.admin?.id;
+        if (!adminId) {
+            return next(new AuthError("Unauthorized"));
+        }
+
+        const admin = await prisma.admin.findUnique({ where: { id: adminId } });
+        if (!admin) {
+            return next(new AuthError("Admin not found"));
+        }
+
+        return res.status(200).json({ success: true, data: admin });
+    } catch (error) {
+        return next(error);
+    }
+}
