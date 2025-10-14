@@ -39,6 +39,16 @@ export const createAdmin = async (req: Request, res: Response, next: NextFunctio
                     email,
                     password,
                     phoneNumber
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    phoneNumber: true,
+                    role: true,
+                    managerId: true,
+                    createdAt: true,
+                    updatedAt: true
                 }
             });
 
