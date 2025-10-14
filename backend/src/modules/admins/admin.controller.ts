@@ -33,11 +33,12 @@ export const createAdmin = async (req: Request, res: Response, next: NextFunctio
         }
 
         if(!existingAdmin){
+            const hashedPassword = await bcrypt.hash(password, 10);
             const newAdmin = await prisma.admin.create({
                 data: {
                     name,
                     email,
-                    password,
+                    password: hashedPassword,
                     phoneNumber
                 },
                 select: {
