@@ -3,6 +3,7 @@ import prisma from "../../packages/libs/prisma";
 import { NextFunction, Request, Response } from "express";
 import { validateRegistrationData } from "../../utils/auth-helper";
 import{ sendCustomEmail, getPatientWelcomeEmail } from '../../utils/send-email';
+import bcrypt from "bcryptjs";
 
 function generateRandomPassword(length = 8) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -25,7 +26,10 @@ export const createAdmin = async (req: Request, res: Response, next: NextFunctio
         });
 
         if(existingAdmin){
-            return res.status(400).json({message: "Admin with this email already exists"});
+            return res.status(400).json({
+                success: false,
+                message: "Admin with this email already exists"
+            });
         }
 
         if(!existingAdmin){
