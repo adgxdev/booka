@@ -2,12 +2,23 @@ import jwt from "jsonwebtoken";
 import prisma from "../../packages/libs/prisma";
 import { NextFunction, Request, Response } from "express";
 import { validateRegistrationData } from "../../utils/auth-helper";
+import{ sendCustomEmail, getPatientWelcomeEmail } from '../../utils/send-email';
+
+function generateRandomPassword(length = 8) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let pwd = '';
+  for (let i = 0; i < length; i++) {
+    pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return pwd;
+}
 
 //Create admin
 export const createAdmin = async (req: Request, res: Response, next: NextFunction) => {
     try {
         validateRegistrationData(req.body, "admin");
-        const {name, email, password, phone_number, university} = req.body;
+        const {name, email, phone_number} = req.body;
+        const password = generateRandomPassword();
 
         const existingAdmin = await prisma.admin.findUnique({
             where: {email}
@@ -23,10 +34,15 @@ export const createAdmin = async (req: Request, res: Response, next: NextFunctio
                     name,
                     email,
                     password,
-                    phone_number,
-                    university
+                    phone_number
                 }
             });
+
+            if(newAdmin){
+                // Send email with credentials
+                const emailContent = await getPatientWelcomeEmail({ full_name: name, email, password });
+                await sendCustomEmail({ to: email, ...emailContent });
+            }
 
             return res.status(201).json({message: "Admin created successfully", admin: newAdmin});
         }
