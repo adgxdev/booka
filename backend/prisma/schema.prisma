@@ -15,25 +15,18 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Manager {
-  id          String   @id @default(uuid())
-  commissions Int
-  lastUpdate  DateTime
-
-  admin Admin[]
-}
-
 model Admin {
-  id           String    @id @default(uuid())
-  name         String
-  email        String    @unique
-  phone_number String
-  role         AdminRole @default(manager)
+  id          String    @id @default(uuid())
+  name        String
+  email       String    @unique
+  phoneNumber String
+  role        AdminRole @default(manager)
+  password    String
 
-  manager   Manager? @relation(fields: [managerId], references: [id])
-  managerId String?
+  // Manager-specific fields (optional)
+  commissions Int?
+  lastUpdate  DateTime?
 
-  password  String
   createdAt DateTime @default(now()) @db.Timestamptz()
   updatedAt DateTime @updatedAt @db.Timestamptz()
 }
