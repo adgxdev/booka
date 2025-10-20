@@ -17,9 +17,10 @@ export async function sendCustomEmail({ to, subject, text, html }: { to: string;
     host: process.env.SMTP_HOST,
     port: process.env.SMTP_PORT,
     secure: Number(process.env.SMTP_PORT) === 465,
-    user: process.env.SMTP_USER ? 'SET' : 'NOT SET'
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   });
-  
+
   try {
     const result = await transporter.sendMail({
       from: `"${orgName}" <${process.env.SMTP_USER}>`,
@@ -37,7 +38,7 @@ export async function sendCustomEmail({ to, subject, text, html }: { to: string;
 }
 
 // Example usage for patient password email:
-export function getPatientWelcomeEmail({ full_name, email, password }: { full_name: string; email: string; password: string }) {
+export function getAdminWelcomeEmail({ full_name, email, password }: { full_name: string; email: string; password: string }) {
   const subject = `Welcome to ${orgName}`;
   const text = `Hello ${full_name},\n\nYou have been registered as an admin on ${orgName}.\n\nYour login email: ${email}\nYour temporary password: ${password}\n\nPlease log in and change your password as soon as possible.\n\nThank you!`;
   const html = `

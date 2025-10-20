@@ -1,9 +1,13 @@
 import "dotenv/config";
-import express, { NextFunction, Request, Response } from "express";
+import express, { Request, Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import adminRouter from "./modules/admins";
-import { AppError } from "./packages/error-handler";
+import { errorHandler } from "./middlewares/errorHandler";
+import { APIError } from "./utils/error-handler";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 // Create app
 const app = express();
@@ -29,26 +33,12 @@ app.get("/health", (_req: Request, res: Response) => {
 app.use("/api/admins", adminRouter); // e.g. POST /api/admins/create-admin
 
 // 404 handler
-app.use((req: Request, _res: Response, next: NextFunction) => {
-  next(new AppError(`Route ${req.method} ${req.originalUrl} not found`, 404));
+app.use((req: Request, _res: Response) => {
+  throw APIError.NotFound(`Route ${req.method} ${req.originalUrl} not found`);
 });
 
 // Centralized error handler
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  const isKnown = err instanceof AppError;
-  const status = isKnown ? err.statusCode : 500;
-
-  if (!isKnown) {
-    // eslint-disable-next-line no-console
-    console.error("[UnhandledError]", err);
-  }
-
-  return res.status(status).json({
-    message: err?.message || "Internal Server Error",
-    ...(isKnown && err.details ? { details: err.details } : {}),
-  });
-});
+app.use(errorHandler);
 
 // Start server only if this file is the entry point (avoid auto-start in tests)
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3001;
