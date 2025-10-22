@@ -1,8 +1,8 @@
-// src/middlewares/errorHandler.ts
+// ...existing code...
 import { Request, Response, NextFunction } from "express";
 import { APIError } from "../utils/error-handler";
 import { APIResponse } from "../utils/APIResponse";
-import { logger } from "../utils/logger";
+import { winstonLogger } from "../utils/logger";
 
 export const errorHandler = (
     err: unknown,
@@ -11,7 +11,15 @@ export const errorHandler = (
     _next: NextFunction
 ) => {
     const error = APIError.from(err);
-    logger.error(`[${req.method}] ${req.originalUrl} -> ${error.message}`);
+
+    const meta = {
+        requestId: req.id ?? null,
+        adminId: (req as any).admin?.id ?? null,
+        universityId: (req as any).university?.id ?? null,
+        stack: error.stack ?? null,
+    };
+
+    winstonLogger.error(`[${req.method}] ${req.originalUrl} -> ${error.message}`, meta);
 
     return APIResponse.error(res, error.message, error.statusCode, error.details);
 };

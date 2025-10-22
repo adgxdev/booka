@@ -1,6 +1,6 @@
 import { NextFunction, Response, Request } from "express";
 import jwt, { TokenExpiredError } from "jsonwebtoken";
-import prisma from "../types/prisma";
+import prisma from "../configs/prisma";
 import { AdminJwtPayload, SafeAdmin, AdminRole } from "../modules/admins/admin.type";
 
 // Shared core verifier

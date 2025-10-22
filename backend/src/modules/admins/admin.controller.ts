@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import prisma from "../../types/prisma";
+import prisma from "../../configs/prisma";
 import { NextFunction, Request, Response } from "express";
 import { generateRandomPassword } from "../../utils/helper";
 import { sendCustomEmail, getAdminWelcomeEmail } from '../../utils/send-email';

@@ -6,6 +6,7 @@ import adminRouter from "./modules/admins";
 import { errorHandler } from "./middlewares/errorHandler";
 import { APIError } from "./utils/error-handler";
 import dotenv from "dotenv";
+import { requestId } from "./middlewares/requestId";
 
 dotenv.config();
 
@@ -23,6 +24,8 @@ app.use(
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cookieParser());
+
+app.use(requestId);
 
 // Health check
 app.get("/health", (_req: Request, res: Response) => {
