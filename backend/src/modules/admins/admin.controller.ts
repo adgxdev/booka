@@ -6,7 +6,7 @@ import { sendCustomEmail, getAdminWelcomeEmail } from '../../utils/send-email';
 import bcrypt from "bcryptjs";
 import { setCookie } from "../../utils/cookies/setCookies";
 import { AdminJwtPayload, CreateAdminDTO } from "./admin.type";
-import { APIError } from "../../utils/error-handler";
+import { APIError } from "../../utils/APIError";
 import { APIResponse } from "../../utils/APIResponse";
 
 

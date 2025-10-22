@@ -3,8 +3,9 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import adminRouter from "./modules/admins";
+import waitlistRouter from "./modules/waitlists";
 import { errorHandler } from "./middlewares/errorHandler";
-import { APIError } from "./utils/error-handler";
+import { APIError } from "./utils/APIError";
 import dotenv from "dotenv";
 import { requestId } from "./middlewares/requestId";
 
@@ -33,7 +34,8 @@ app.get("/health", (_req: Request, res: Response) => {
 });
 
 // API routes
-app.use("/api/admins", adminRouter); // e.g. POST /api/admins/create-admin
+app.use("/api/admins", adminRouter);
+app.use("/api/waitlists", waitlistRouter);
 
 // 404 handler
 app.use((req: Request, _res: Response) => {

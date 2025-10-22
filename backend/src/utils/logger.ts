@@ -1,6 +1,17 @@
-import winston, { level } from "winston";
+import winston from "winston";
 import prisma from "../configs/prisma";
-import { AuditLogType, Entity } from "../generated/prisma";
+import { AuditLogType, AuduitLogLevel, Entity } from "../generated/prisma";
+
+type Meta = {
+    adminId?: string | null;
+    universityId?: string | null;
+    entity?: Entity;
+    entityId?: string;
+    type?: AuditLogType;
+    requestId?: string;
+    stack?: string;
+    level?: AuduitLogLevel;
+};
 
 // save to AuditLog model as well 
 export const winstonLogger = winston.createLogger({
@@ -16,61 +27,60 @@ export const winstonLogger = winston.createLogger({
     ],
 });
 
-// logger interface to save to AuditLog model and also use winston
-// ...existing code...
 export const logger = {
-    info: (message: string, meta: Record<string, unknown> = {}) => {
+    info: (message: string, meta: Meta) => {
         winstonLogger.info(message, meta);
         prisma.auditLog.create({
             data: {
                 action: message,
-                adminId: meta.adminId as string | null,
-                universityId: meta.universityId as string | null,
-                entity: meta.entity as Entity,
-                entityId: meta.entityId as string,
-                type: meta.type as AuditLogType,
-                level: 'info',
+                adminId: meta.adminId ?? null,
+                universityId: meta.universityId ?? null,
+                entity: (meta.entity as Entity) ?? "system",
+                entityId: meta.entityId ?? null,
+                type: meta.type ?? "create",
+                level: "info",
                 requestId: meta.requestId as string
             }
         }).catch((e) => {
-            // ensure audit failures don't crash the app; record them to winston
-            winstonLogger.error("Failed to save audit log (info)", { error: e });
+            winstonLogger.error("Failed to save audit log (info)", { error: e.message, stack: e.stack });
         });
     },
-    error: (message: string, meta: Record<string, unknown> = {}) => {
-        meta.stack = meta.stack || new Error().stack;
-        winstonLogger.error(message, meta);
-        prisma.auditLog.create({
-            data: {
-                action: message,
-                adminId: meta.adminId as string | null,
-                universityId: meta.universityId as string | null,
-                entity: meta.entity as Entity,
-                entityId: meta.entityId as string,
-                type: meta.type as AuditLogType,
-                level: 'error',
-                requestId: meta.requestId as string
-            }
-        }).catch((e) => {
-            winstonLogger.error("Failed to save audit log (error)", { error: e });
-        });
-    },
-    warn: (message: string, meta: Record<string, unknown> = {}) => {
+
+    warn: (message: string, meta: Meta) => {
         meta.stack = meta.stack || new Error().stack;
         winstonLogger.warn(message, meta);
         prisma.auditLog.create({
             data: {
                 action: message,
-                adminId: meta.adminId as string | null,
-                universityId: meta.universityId as string | null,
-                entity: meta.entity as Entity,
-                entityId: meta.entityId as string,
-                type: meta.type as AuditLogType,
-                level: 'warning',
+                adminId: meta.adminId ?? null,
+                universityId: meta.universityId ?? null,
+                entity: (meta.entity as Entity) ?? "system",
+                entityId: meta.entityId ?? null,
+                type: meta.type ?? "update",
+                level: "warning",
                 requestId: meta.requestId as string
             }
         }).catch((e) => {
-            winstonLogger.error("Failed to save audit log (warn)", { error: e });
+            winstonLogger.error("Failed to save audit log (warn)", { error: e.message, stack: e.stack });
+        });
+    },
+
+    error: (message: string, meta: Meta) => {
+        meta.stack = meta.stack || new Error().stack;
+        winstonLogger.error(message, meta);
+        prisma.auditLog.create({
+            data: {
+                action: message,
+                adminId: meta.adminId ?? null,
+                universityId: meta.universityId ?? null,
+                entity: (meta.entity as Entity) ?? "system",
+                entityId: meta.entityId ?? null,
+                type: meta.type ?? "create",
+                level: "error",
+                requestId: meta.requestId as string
+            }
+        }).catch((e) => {
+            winstonLogger.error("Failed to save audit log (error)", { error: e.message, stack: e.stack });
         });
     }
 };

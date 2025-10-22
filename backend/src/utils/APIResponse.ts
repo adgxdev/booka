@@ -1,6 +1,6 @@
 // src/utils/APIResponse.ts
 import type { Response } from "express";
-import type { ErrorDetails } from "./error-handler";
+import type { ErrorDetails } from "./APIError";
 
 export class APIResponse {
     /**
