@@ -12,4 +12,80 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // directUrl = env("DIRECT_URL")
+}
+
+model Admin {
+  id          String    @id @default(uuid())
+  name        String
+  email       String    @unique
+  phoneNumber String
+  role        AdminRole @default(manager)
+  password    String
+
+  // Manager-specific fields (optional)
+  commissions Int?
+  lastUpdate  DateTime?
+
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+
+  AuditLog AuditLog[]
+}
+
+model University {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+
+  AuditLog AuditLog[]
+}
+
+model AuditLog {
+  id           String         @id @default(uuid())
+  entityId     String
+  action       String
+  universityId String?
+  adminId      String?
+  type         AuditLogType
+  level        AuduitLogLevel @default(info)
+  requestId    String
+
+  entity     Entity
+  admin      Admin?      @relation(fields: [adminId], references: [id])
+  university University? @relation(fields: [universityId], references: [id])
+
+  timestamp DateTime @default(now()) @db.Timestamptz()
+}
+
+model Waitlist {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  referralCode String?
+  createdAt    DateTime @default(now()) @db.Timestamptz()
+}
+
+enum AdminRole {
+  manager
+  super
+}
+
+enum Entity {
+  admin
+  waitlist
+}
+
+enum AuditLogType {
+  create
+  update
+  delete
+  system
+}
+
+enum AuduitLogLevel {
+  info
+  warning
+  error
 }
