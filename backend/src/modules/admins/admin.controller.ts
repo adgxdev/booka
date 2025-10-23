@@ -152,28 +152,28 @@ export const resetAdminPassword = async (req: any, res: Response) => {
 export const refreshAdminToken = async (req: Request, res: Response) => {
     const presentedToken = req.cookies["adminRefreshToken"] || req.body.refreshToken;
     if (!presentedToken) {
-        return res.status(401).json({ message: "Refresh token missing" });
+        throw APIError.Unauthorized("Refresh token missing");
     }
 
     let decoded: AdminJwtPayload;
     try {
         decoded = jwt.verify(presentedToken, process.env.REFRESH_TOKEN_SECRET!) as AdminJwtPayload;
     } catch (err) {
-        return res.status(401).json({ message: "Invalid or expired refresh token" });
+        throw APIError.Unauthorized("Invalid or expired refresh token");
     }
 
     if (!decoded.id || !decoded.role) {
-        return res.status(401).json({ message: "Malformed refresh token" });
+        throw APIError.Unauthorized("Malformed refresh token");
     }
 
     const admin = await prisma.admin.findUnique({ where: { id: decoded.id } });
     if (!admin) {
-        return res.status(401).json({ message: "Admin not found" });
+        throw APIError.NotFound("Admin not found");
     }
 
     // Ensure the role in DB matches allowed roles (manager/super)
     if (admin.role !== "manager" && admin.role !== "super") {
-        return res.status(403).json({ message: "Forbidden: invalid role" });
+        throw APIError.Forbidden("Invalid role");
     }
 
     // (Optional future enhancement): rotate refresh token & invalidate old one.
@@ -186,7 +186,7 @@ export const refreshAdminToken = async (req: Request, res: Response) => {
     // Maintain consistent cookie naming with login (adminAccessToken)
     setCookie(res, "adminAccessToken", newAccessToken);
 
-    return res.status(200).json({ message: "Admin access token refreshed", role: admin.role });
+    return APIResponse.success(res, "Admin access token refreshed", { role: admin.role }, 200);
 };
 
 export const logoutAdmin = async (req: Request, res: Response, next: NextFunction) => {
@@ -205,10 +205,7 @@ export const logoutAdmin = async (req: Request, res: Response, next: NextFunctio
         sameSite: isProduction ? "none" : "lax"
     });
 
-    res.status(200).json({
-        success: true,
-        message: "Logged out successfully"
-    });
+    return APIResponse.success(res, "Logged out successfully");
 }
 
 export const updatePersonalAdminInfo = async (req: any, res: Response, next: NextFunction) => {
@@ -229,11 +226,19 @@ export const updatePersonalAdminInfo = async (req: any, res: Response, next: Nex
 
     const myUpdatedAdmin = await prisma.admin.update({
         where: { id: adminId },
-        data: { name, phoneNumber, email }
-    })
+        data: { name, phoneNumber, email },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            phoneNumber: true,
+            role: true,
+            createdAt: true,
+            updatedAt: true,
+        }
+    });
 
-
-    return res.status(200).json({ success: true, data: myUpdatedAdmin });
+    return APIResponse.success(res, "Profile updated successfully", { admin: myUpdatedAdmin }, 200);
 }
 
 export const getPersonalAdminInfo = async (req: any, res: Response, next: NextFunction) => {
@@ -242,10 +247,21 @@ export const getPersonalAdminInfo = async (req: any, res: Response, next: NextFu
         throw APIError.Unauthorized("Unauthorized");
     }
 
-    const admin = await prisma.admin.findUnique({ where: { id: adminId } });
+    const admin = await prisma.admin.findUnique({ 
+        where: { id: adminId },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            phoneNumber: true,
+            role: true,
+            createdAt: true,
+            updatedAt: true,
+        }
+    });
     if (!admin) {
         throw APIError.NotFound("Admin not found");
     }
 
-    return res.status(200).json({ success: true, data: admin });
+    return APIResponse.success(res, "Admin info fetched successfully", { admin }, 200);
 }
