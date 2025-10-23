@@ -109,7 +109,14 @@ export const loginAdmin = async (req: Request, res: Response) => {
     setCookie(res, "adminAccessToken", accessToken);
     setCookie(res, "adminRefreshToken", refreshToken);
 
-    return APIResponse.success(res, "Login successful", { admin: { id: admin.id, name: admin.name, email: admin.email, role: admin.role } }, 200);
+    const loggedInAdminDetails = { 
+        id: admin.id, 
+        name: admin.name,
+        email: admin.email,
+        role: admin.role
+    };
+
+    return APIResponse.success(res, "Login successful", { admin: loggedInAdminDetails }, 200);
 }
 
 export const resetAdminPassword = async (req: any, res: Response) => {
