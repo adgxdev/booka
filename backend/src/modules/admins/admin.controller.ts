@@ -109,10 +109,7 @@ export const loginAdmin = async (req: Request, res: Response) => {
     setCookie(res, "adminAccessToken", accessToken);
     setCookie(res, "adminRefreshToken", refreshToken);
 
-    res.status(200).json({
-        message: "Login successful",
-        admin: { id: admin.id, name: admin.name, email: admin.email, role: admin.role },
-    })
+    return APIResponse.success(res, "Login successful", { admin: { id: admin.id, name: admin.name, email: admin.email, role: admin.role } }, 200);
 }
 
 export const resetAdminPassword = async (req: any, res: Response) => {
@@ -148,7 +145,7 @@ export const resetAdminPassword = async (req: any, res: Response) => {
     const hashed = await bcrypt.hash(newPassword, 10);
     await prisma.admin.update({ where: { id: adminId }, data: { password: hashed } });
 
-    return res.status(200).json({ success: true, message: "Password updated successfully" });
+    return APIResponse.success(res, "Password updated successfully", 200);
 }
 
 // Refresh admin token
