@@ -1,5 +1,5 @@
 import z from "zod";
-import { Waitlist } from "../../generated/prisma";
+import { Waitlist } from "@prisma/client";
 
 
 export type SafeWaitlist = {
