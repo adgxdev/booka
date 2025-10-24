@@ -1,5 +1,5 @@
 import { NextFunction, Request } from "express";
-import { APIError } from "../utils/error-handler";
+import { APIError } from "../utils/APIError";
 import prisma from "../configs/prisma";
 
 export const isAnyUniversityAuthenticated = (

@@ -10,9 +10,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  // directUrl = env("DIRECT_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Admin {
@@ -45,7 +45,7 @@ model University {
 
 model AuditLog {
   id           String         @id @default(uuid())
-  entityId     String
+  entityId     String?
   action       String
   universityId String?
   adminId      String?
@@ -61,10 +61,16 @@ model AuditLog {
 }
 
 model Waitlist {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  referralCode String?
-  createdAt    DateTime @default(now()) @db.Timestamptz()
+  id           String  @id @default(uuid())
+  email        String  @unique
+  referralCode String  @unique
+  parentCode   String? // not unique — multiple users can share same parent code
+
+  // Relations
+  referredBy Waitlist?  @relation("WaitlistReferrals", fields: [parentCode], references: [referralCode])
+  referrals  Waitlist[] @relation("WaitlistReferrals")
+
+  createdAt DateTime @default(now()) @db.Timestamptz()
 }
 
 enum AdminRole {
@@ -75,6 +81,8 @@ enum AdminRole {
 enum Entity {
   admin
   waitlist
+  system
+  university
 }
 
 enum AuditLogType {

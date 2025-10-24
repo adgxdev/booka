@@ -1,6 +1,6 @@
 // ...existing code...
 import { Request, Response, NextFunction } from "express";
-import { APIError } from "../utils/error-handler";
+import { APIError } from "../utils/APIError";
 import { APIResponse } from "../utils/APIResponse";
 import { winstonLogger } from "../utils/logger";
 
