@@ -4,11 +4,10 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
     "build": "npm install --include=dev && npx prisma generate && tsc",
-    "postinstall": "prisma migrate deploy",
-    "start": "node dist/app.js"
+    "migrate": "npx prisma migrate deploy",
+    "start": "npm run migrate && node dist/app.js"
   },
   "repository": {
     "type": "git",
