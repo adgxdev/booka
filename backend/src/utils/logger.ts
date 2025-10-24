@@ -1,6 +1,7 @@
 import winston from "winston";
 import prisma from "../configs/prisma";
-import { AuditLogType, AuduitLogLevel, Entity } from "../generated/prisma";
+import { AuditLogType, AuduitLogLevel, Entity } from "@prisma/client";
+// import { AuditLogType, AuduitLogLevel, Entity } from "";
 
 type Meta = {
     adminId?: string | null;
