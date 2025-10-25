@@ -69,3 +69,29 @@ export const createWaitlist = async (req: Request, res: Response) => {
         waitlistEntry: sanitizeWaitlist(waitlistEntry)
     }, 201);
 };
+
+export const getSingleWaitlist = async (req: Request, res: Response) => {
+    const waitlistId = req.params.id;
+    const waitlistEntry = await prisma.waitlist.findUnique({
+        where: { id: waitlistId },
+        include: { referrals: true, referredBy: true },
+    });
+    if (!waitlistEntry) {
+        logger.warn(`Waitlist entry not found`, {
+            entity: "waitlist",
+            type: "read",
+            requestId: req.id,
+        });
+        return APIResponse.success(res, "Waitlist entry not found.", { waitlist: [] }, 404);
+    }
+
+    logger.info(`Waitlist entry retrieved`, {
+        entity: "waitlist",
+        entityId: waitlistEntry.id,
+        type: "read",
+        requestId: req.id,
+    });
+    return APIResponse.success(res, "Waitlist entry retrieved successfully.", {
+        waitlist: sanitizeWaitlist(waitlistEntry),
+    });
+}
