@@ -151,7 +151,7 @@ export default function ReferralPage({ params, }: { params: Promise<{ id: string
                         <h2 className="mt-3 text-base md:text-lg font-medium text-white">So far {" "}
                         {waitlistData?.referrals?.length
                             ? waitlistData.referrals.length
-                            : 0}{" "} friends referred. Keep sharing!</h2>
+                            : 0}{" "} friends referred. Keep sharing!</h2> 
 
                         <div className="w-full">
                             <div className="hidden md:block bg-white/20 w-full mx-auto h-1 mt-4 rounded-lg">
