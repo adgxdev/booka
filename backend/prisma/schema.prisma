@@ -1,15 +1,82 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id          String     @id @default(uuid())
+  name        String
+  email       String     @unique
+  phoneNumber String
+  role        AdminRole  @default(manager)
+  password    String
+  commissions Int?
+  lastUpdate  DateTime?
+  createdAt   DateTime   @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime   @updatedAt @db.Timestamptz(6)
+  AuditLog    AuditLog[]
+}
+
+model University {
+  id        String     @id @default(uuid())
+  name      String
+  slug      String     @unique
+  createdAt DateTime   @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime   @updatedAt @db.Timestamptz(6)
+  AuditLog  AuditLog[]
+}
+
+model AuditLog {
+  id           String         @id @default(uuid())
+  entity       Entity
+  entityId     String?
+  action       String
+  adminId      String?
+  level        AuduitLogLevel @default(info)
+  requestId    String
+  timestamp    DateTime       @default(now()) @db.Timestamptz(6)
+  type         AuditLogType
+  universityId String?
+  admin        Admin?         @relation(fields: [adminId], references: [id])
+  university   University?    @relation(fields: [universityId], references: [id])
+}
+
+model Waitlist {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  referralCode String     @unique
+  createdAt    DateTime   @default(now()) @db.Timestamptz(6)
+  parentCode   String?
+  referredBy   Waitlist?  @relation("WaitlistReferrals", fields: [parentCode], references: [referralCode])
+  referrals    Waitlist[] @relation("WaitlistReferrals")
+}
+
+enum AdminRole {
+  manager
+  super
+}
+
+enum Entity {
+  admin
+  waitlist
+  system
+  university
+}
+
+enum AuditLogType {
+  create
+  update
+  delete
+  system
+  read
+}
+
+enum AuduitLogLevel {
+  info
+  warning
+  error
 }
