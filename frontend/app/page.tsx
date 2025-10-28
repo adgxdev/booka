@@ -66,11 +66,6 @@ export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const router = useRouter();
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-  if (!API_URL) {
-    throw new Error("❌ Missing API_URL environment variable");
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,7 +76,7 @@ export default function Home() {
       setIsSubmitting(true);
 
       const res = await axios.post(
-        `${API_URL}/api/waitlists/join`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/waitlists/join`,
         data
       );
 

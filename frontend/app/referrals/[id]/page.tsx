@@ -27,17 +27,12 @@ export default function ReferralPage({ params, }: { params: Promise<{ id: string
     const [waitlistData, setWaitlistData] = useState<WaitlistData | null>(null);
     const [loading, setLoading] = useState(true);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
-    const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-    if (!API_URL) {
-        throw new Error("❌ Missing API_URL environment variable");
-    }
 
     useEffect(() => {
         const fetchUserData = async (userId : string) => {
             try {
                 setLoading(true);
-                const response = await axios.get<ApiResponse<WaitlistData>>(`${API_URL}/api/waitlists/${userId}`);
+                const response = await axios.get<ApiResponse<WaitlistData>>(`${process.env.NEXT_PUBLIC_API_URL}/api/waitlists/${userId}`);
                 setWaitlistData(response.data?.data?.waitlist);
                 setErrorMsg(null);
             } catch (error) {
@@ -52,7 +47,7 @@ export default function ReferralPage({ params, }: { params: Promise<{ id: string
         };
 
         if (id) fetchUserData(id);
-    },[id, API_URL]);
+    },[id]);
 
     if (loading) {
         return (
