@@ -3,6 +3,7 @@ import { Geist_Mono, Poppins } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { boldFont } from "./font";
+import { Toaster } from "react-hot-toast";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -33,6 +34,22 @@ export default function RootLayout({
       >
         <Navbar />
         {children}
+        <Toaster position="top-center" toastOptions={{
+            duration: 3000,
+            style: {
+              background: "#00C6FF",
+              color: "#fff",
+              fontSize: "0.875rem", // text-sm
+              borderRadius: "0.375rem", // rounded-md
+              padding: "8px 14px",
+            },
+            success: {
+              iconTheme: {
+                primary: "#FFD166",
+                secondary: "#00C6FF",
+              },
+            },
+          }} />
       </body>
     </html>
   );
