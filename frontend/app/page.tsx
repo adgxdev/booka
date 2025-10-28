@@ -1,62 +1,13 @@
-// 'use client';
-// import Image from "next/image";
-// import Link from "next/link";
-// import { BsTwitterX } from "react-icons/bs";
-// import { useState } from "react";
-// import ReferralBox from "@/components/ReferralBox";
-
-// export default function Home() {
-
-//   const [submitted, setSubmitted] = useState(false);
-
-//   return (
-//       <main className="bg-[#0A192F] text-white h-dvh w-full overflow-hidden">
-        
-//           <div className="py-24 xl:py-0 relative w-11/12 mx-auto h-full flex flex-col md:flex-row justify-center items-center">
-//             <div className="opacity-90 xl:opacity-100 h-full w-full xl:w-6/12 flex items-center justify-center md:justify-center xl:justify-end">
-//               <div className="h-full xl:w-8/12 flex md:items-center justify-end">
-//                 <Image src='/images/phone.png' width={500} height={500} className="h-fit xl:h-11/12 xl:w-fit border" alt="booka app" />
-//               </div>
-//             </div>
-//             <div className="h-full fixed bottom-0 md:bottom-0 md:relative bg-gradient-to-t to-transparent from-[#0A192F] rounded py-8 w-full xl:w-7/12 flex items-end md:items-center justify-center xl:items-center xl:justify-start">
-//               {!submitted ? (
-//                 <div className="w-full md:w-full xl:w-7/12 flex flex-col justify-center items-center text-center">
-//                   <h1 className="w-11/12 xl:w-full bold-text text-[#00C6FF] text-2xl md:text-2xl lg:text-3xl xl:text-2xl font-semibold uppercase leading-7">Order textbooks with ease, not queues.</h1>
-//                   <p className="w-11/12 font-light text-sm md:text-xs mt-4 mb-4">A smarter way for students to get their  books faster, cheaper and stress free, Skip the long queues, save money, and get your books with ease.</p>
-//                   <form onSubmit={(e) => {
-//                     e.preventDefault();
-//                     setSubmitted(true);
-//                   }}
-//                   className="w-full text-sm flex justify-center items-center flex-col">
-//                     <input type="email" className="bg-gray-100 text-black w-11/12 border border-[#3a3737] outline-none py-3 ps-3 rounded" name="email" placeholder="Enter your email address" />
-//                     <div className="w-full flex justify-center items-center mt-4">
-//                       <button type="submit" className="w-11/12 flex justify-center items-center text-center hover:cursor-pointer bg-[#00C6FF] text-white py-3 px-3 rounded hover:scale-102 duration-500 uppercase font-normal text-base">Join waitlist</button>
-//                     </div>
-                    
-//                   </form>
-//                   <div className="mt-4">
-//                     <Link href={'https://x.com/bookaafrik'} target="_blank" className="flex items-center gap-1 text-[#FFD166] hover:underline">
-//                       <BsTwitterX className="h-4 w-4" /><span className="ms-2 text-sm">Follow us on X for updates</span>
-//                     </Link>
-//                   </div>
-//                 </div>
-//               ) : (
-//                 <ReferralBox onReferralSubmitAction={(code) => console.log("Referral code:", code)} />
-//               )}
-//             </div>
-//           </div>
-//       </main>
-//   );
-// }
-
-
 'use client';
 import Image from "next/image";
 import Link from "next/link";
 import { BsTwitterX } from "react-icons/bs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
+import { getUser, storeUser } from "@/action";
+import { GrAnalytics } from "react-icons/gr";
+import toast from "react-hot-toast";
 
 export default function Home() {
   const [step, setStep] = useState(1);
@@ -65,7 +16,13 @@ export default function Home() {
   const [referralCode, setReferralCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const router = useRouter();
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  if (!API_URL) {
+    throw new Error("❌ Missing API_URL environment variable");
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,14 +33,14 @@ export default function Home() {
       setIsSubmitting(true);
 
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/waitlists/join`,
+        `${API_URL}/api/waitlists/join`,
         data
       );
 
       if (res.data.success) {
         const entry = res.data.data.waitlistEntry;
-
-        // ✅ Success — redirect user to referral page
+        await storeUser(entry.id);
+        // success, redirect user to referral page
         setMessage('🎉 Successfully joined the waitlist!');
         setTimeout(() => {
           router.push(`/referrals/${entry.id}`);
@@ -101,8 +58,20 @@ export default function Home() {
     }
   };
 
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const id = await getUser();
+        setUserId(id);
+      } catch (error) {
+        console.error("Failed to get user:", error);
+      }
+    }
+    fetchUser();
+  }, []);
+
   return (
-    <main className="bg-[#0A192F] text-white h-dvh w-full overflow-hidden">
+    <main className="bg-[#0A192F] text-white h-screen w-full overflow-hidden">
       <div className="py-24 xl:py-0 relative w-11/12 mx-auto h-full flex flex-col md:flex-row justify-center items-center">
         {/* Left side image */}
         <div className="opacity-90 xl:opacity-100 h-full w-full xl:w-6/12 flex items-center justify-center xl:justify-end">
@@ -237,15 +206,36 @@ export default function Home() {
             )}
 
             {/* Social Link */}
-            <div className="mt-4">
+            <div className="w-11/12 mt-4 flex justify-between items-center">
               <Link
                 href={"https://x.com/bookaafrik"}
                 target="_blank"
                 className="flex items-center gap-1 text-[#FFD166] hover:underline"
               >
                 <BsTwitterX className="h-4 w-4" />
-                <span className="ms-2 text-sm">Follow us on X for updates</span>
+                <span className="ms-1 text-sm">Get Updates on X</span>
               </Link>
+              {userId ? (
+                <Link
+                  href={`/referrals/${userId}`}
+                  target="_blank"
+                  className="flex items-center gap-1 text-[#FFD166] hover:underline"
+                >
+                  <GrAnalytics className="h-4 w-4" />
+                  <span className="ms-1 text-sm">Track Referrals</span>
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => toast("Join the waitlist to get your referral link!", {
+                    icon: "📩",
+                  })}
+                  className="flex items-center gap-1 text-gray-400 hover:cursor-help transition-colors"
+                >
+                  <GrAnalytics className="h-4 w-4" />
+                  <span className="ms-1 text-sm">Track Referrals</span>
+                </button>
+              )}
             </div>
           </form>
         </div>
