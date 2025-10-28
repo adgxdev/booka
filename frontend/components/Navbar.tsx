@@ -8,8 +8,9 @@ export default function Navbar() {
                     <h1 className="text-[#00C6FF] text-lg font-bold bold-text">Booka</h1>
                 </Link>
                 <div className="">
-                    <Link href="/about" className="bg-[#00C6FF] text-white rounded py-2.5 px-3 text-sm flex gap-2 items-center justify-center font-normal hover:scale-102 duration-500">
-                        Get the App<span className="uppercase text-xs bg-[#FFD166] rounded text-white px-2 py-0.5">Soon</span></Link>
+                    <span className="bg-[#00C6FF] text-white rounded py-2.5 px-3 text-sm flex gap-2 items-center justify-center font-normal hover:scale-102 duration-500 hover:cursor-pointer">
+                        Get the App<span className="uppercase text-xs bg-[#FFD166] rounded text-white px-2 py-0.5">Soon</span>
+                    </span>
                 </div>
             </div>
         </nav>
