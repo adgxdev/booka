@@ -40,7 +40,7 @@ export default function Home() {
       if (res.data.success) {
         const entry = res.data.data.waitlistEntry;
         await storeUser(entry.id);
-        // redirect user to referral page
+        // success, redirect user to referral page
         setMessage('🎉 Successfully joined the waitlist!');
         setTimeout(() => {
           router.push(`/referrals/${entry.id}`);
