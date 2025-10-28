@@ -10,7 +10,7 @@ interface WaitlistData {
   referralCode: string;
   parentCode: string | null;
   createdAt: string;
-  referredBy?: WaitlistData | null; // same structure for referredBy
+  referredBy?: WaitlistData | null; // same structure for referredBy data
   referrals?: WaitlistData[]; // array of other waitlist entries
 }
 
