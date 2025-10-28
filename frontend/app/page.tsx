@@ -55,18 +55,50 @@ import Image from "next/image";
 import Link from "next/link";
 import { BsTwitterX } from "react-icons/bs";
 import { useState } from "react";
+import axios, { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [hasReferral, setHasReferral] = useState<null | boolean>(null);
   const [referralCode, setReferralCode] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const data = { email, referralCode: hasReferral ? referralCode : null };
-    console.log("Final Submission:", data);
-    
+
+    const data = { email, refCode: hasReferral ? referralCode || "" : "" };
+
+    try {
+      setIsSubmitting(true);
+
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/waitlists/join`,
+        data
+      );
+
+      if (res.data.success) {
+        const entry = res.data.data.waitlistEntry;
+
+        // ✅ Success — redirect user to referral page
+        setMessage('🎉 Successfully joined the waitlist!');
+        setTimeout(() => {
+          router.push(`/referrals/${entry.id}`);
+        }, 1200);
+      } else {
+        setMessage(res.data.message || 'Something went wrong.');
+      }
+
+    } catch (error) {
+      const err = error as AxiosError<{ message?: string }>;
+      const errMsg = err.response?.data?.message || 'An error occurred. Please try again.';
+      setMessage(errMsg);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -110,9 +142,16 @@ export default function Home() {
                   name="email"
                   placeholder="Enter your email address"
                 />
-                <button
+                  <button
                   type="button"
-                  onClick={() => setStep(2)}
+                  onClick={() => {
+                    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailPattern.test(email)) {
+                      alert("Please enter a valid email address.");
+                      return;
+                    }
+                    setStep(2);
+                  }}
                   disabled={!email}
                   className="w-11/12 mt-4 flex justify-center items-center text-center hover:cursor-pointer bg-[#00C6FF] text-white py-3 px-3 rounded hover:scale-105 duration-500 uppercase font-normal text-base disabled:opacity-50"
                 >
@@ -162,9 +201,10 @@ export default function Home() {
                 />
                 <button
                   type="submit"
-                  className="w-11/12 mt-4 bg-[#00C6FF] text-white py-3 px-3 rounded hover:scale-105 duration-500 uppercase font-normal text-base"
+                  disabled={isSubmitting}
+                  className="w-11/12 mt-4 bg-[#00C6FF] text-white py-3 px-3 rounded hover:scale-105 duration-500 uppercase font-normal text-base disabled:opacity-50"
                 >
-                  Join Waitlist
+                  {isSubmitting ? 'Joining...' : 'Join Waitlist'}
                 </button>
               </div>
             )}
@@ -177,11 +217,23 @@ export default function Home() {
                 </p>
                 <button
                   type="submit"
-                  className="rounded w-full bg-[#00C6FF] py-3 hover:scale-105 hover:cursor-pointer duration-500 uppercase font-normal"
+                  disabled={isSubmitting}
+                  className="rounded w-full bg-[#00C6FF] py-3 hover:scale-105 hover:cursor-pointer duration-500 uppercase font-normal disabled:opacity-50"
                 >
-                  Join Waitlist
+                  {isSubmitting ? 'Joining...' : 'Join Waitlist'}
                 </button>
               </div>
+            )}
+
+            {/* Message (error or success) */}
+            {message && (
+              <p
+                className={`mt-4 text-sm ${
+                  message.startsWith('🎉') ? 'text-green-400' : 'text-red-400'
+                }`}
+              >
+                {message}
+              </p>
             )}
 
             {/* Social Link */}
