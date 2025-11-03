@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
 export async function sendCustomEmail({ to, subject, text, html }: { to: string; subject: string; text: string; html: string }) {
   console.log('[Email] Attempting to send email with config:', {
     host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
+    port: Number(process.env.SMTP_PORT),
     secure: Number(process.env.SMTP_PORT) === 465,
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
