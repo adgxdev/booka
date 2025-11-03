@@ -3,7 +3,7 @@ export default function SignupPage() {
         <main>
             <section>
                 Signup
-                <label>done</label>
+                <label>Name</label>
             </section>
         </main>
     );
