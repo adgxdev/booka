@@ -1,7 +1,4 @@
 import nodemailer from 'nodemailer';
-import { config } from "dotenv";
-
-config();
 
 const orgName = 'Booka';
 
@@ -53,24 +50,6 @@ export function getAdminWelcomeEmail({ full_name, email, password }: { full_name
          <b>Your temporary password:</b> <span style="font-family:monospace;">${password}</span></p>
       <p>Please log in and change your password as soon as possible.</p>
       <br/>
-      <p>Thank you!</p>
-    </div>
-  `;
-  return { subject, text, html };
-}
-export function waitlistEmail({ email, id }: { email: string, id: string }) {
-  const subject = `Welcome to ${orgName}`;
-  const text = `Hello\n\nYou have been added to waitlist on ${orgName}.\n\nYour login email: ${email}\n\nPlease fill out this form to secure your spot.\n\nThank you!`;
-  const html = `
-    <div style="font-family: Arial, sans-serif;">
-      <h2>Welcome to ${orgName}</h2>
-      <p>Hello,</p>
-      <p>You have been added to the waitlist on <b>${orgName}</b>.</p>
-      
-      <p>We need one more favour from you</p></br>
-      <p> Please fill out this <a href="https://docs.google.com/forms/d/e/1FAIpQLScbLWJNyqLpvAKy1qgLrT91qw0u1Pn8B4SEK8W-AlNNQgcbqw/viewform?usp=header"> waitlist form </a> for extra waitlist benefits</p>
-      <br/>
-      <a href="${process.env.CLIENT_ORIGIN}/referrals/${id}"> Track your referrals </a>
       <p>Thank you!</p>
     </div>
   `;
