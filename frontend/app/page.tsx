@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { getUser, storeUser } from "@/action";
 import { GrAnalytics } from "react-icons/gr";
 import toast from "react-hot-toast";
+import Navbar from "@/components/Navbar";
 
 export default function Home() {
   const [step, setStep] = useState(1);
@@ -72,12 +73,13 @@ export default function Home() {
 
   return (
     <main className="bg-[#0A192F] text-white h-screen w-full overflow-hidden">
+      <Navbar />
       <div className="py-24 xl:py-0 relative w-11/12 mx-auto h-full flex flex-col md:flex-row justify-center items-center">
         {/* Left side image */}
         <div className="opacity-90 xl:opacity-100 h-full w-full xl:w-6/12 flex items-center justify-center xl:justify-end">
           <div className="h-full xl:w-8/12 flex md:items-center justify-end">
             <Image
-              src="/images/phone.png"
+              src="/images/phonet.png"
               width={500}
               height={500}
               className="h-fit xl:h-11/12 xl:w-fit border"
@@ -96,7 +98,7 @@ export default function Home() {
               Order textbooks with ease, not queues.
             </h1>
             <p className="w-11/12 text-base mt-4 mb-4">
-              A smarter way for students to get their books faster, cheaper and stress free.
+              A smarter way for students to get their textbooks faster and without the stress.
             </p>
 
             {/* Step 1 – Email input */}

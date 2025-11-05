@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Poppins } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
 import { boldFont } from "./font";
 import { Toaster } from "react-hot-toast";
 
@@ -32,7 +31,6 @@ export default function RootLayout({
       <body
         className={`${poppins.className} ${geistMono.variable} ${boldFont.variable} antialiased`}
       >
-        <Navbar />
         {children}
         <Toaster position="top-center" toastOptions={{
             duration: 3000,
