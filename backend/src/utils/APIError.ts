@@ -37,8 +37,8 @@ export class APIError extends Error {
         return new APIError(404, message);
     }
 
-    static Conflict(message = "Conflict") {
-        return new APIError(409, message);
+    static Conflict(message = "Conflict", details?: ErrorDetails) {
+        return new APIError(409, message, details);
     }
 
     static Internal(message = "Internal Server Error") {
