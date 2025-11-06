@@ -98,7 +98,7 @@ export default function Home() {
               Order textbooks with ease, not queues.
             </h1>
             <p className="w-11/12 text-base mt-4 mb-4">
-              A smarter way for students to get their textbooks faster and without the stress.
+              A smarter way for students to get their textbooks faster and without stress.
             </p>
 
             {/* Step 1 – Email input */}
