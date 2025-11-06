@@ -5,7 +5,7 @@ import prisma from "../../configs/prisma";
 import { APIError } from "../../utils/APIError";
 import { APIResponse } from "../../utils/APIResponse";
 import { logger } from "../../utils/logger";
-import { sendCustomEmail, waitlistEmail } from "../../utils/send-email";
+// import { sendCustomEmail, waitlistEmail } from "../../utils/send-email";
 
 export const createWaitlist = async (req: Request, res: Response) => {
     const body = CreateWaitlistDto.parse(req.body);
@@ -23,7 +23,7 @@ export const createWaitlist = async (req: Request, res: Response) => {
             type: "create",
             requestId: req.id
         });
-        throw APIError.Conflict("Email is already registered in the waitlist.");
+        throw APIError.Conflict("Email is already registered in the waitlist.", { entry: existing });
     };
 
     // 2️⃣ Generate unique referral code
