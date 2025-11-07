@@ -400,19 +400,19 @@ export default function ReferralPage({ params }: { params: Promise<{ id: string 
       <div className="w-11/12 md:w-9/12 mx-auto text-center">
         <FaGift className="text-[#FFD166] h-20 w-20 mx-auto mb-3 animate-bounce" />
 
-        <h1 className="text-xl md:text-3xl font-bold bold-text text-[#00C6FF]">
+        <h1 className="text-lg md:text-3xl font-bold bold-text text-[#00C6FF]">
           Booka Early Referral Program 🎉
         </h1>
         <p className="text-sm md:text-base mt-2 mb-5 text-gray-300">
           Invite your friends, unlock early access, and earn exclusive Booka rewards!
         </p>
 
-        <div className="border border-white/20 bg-white/10 backdrop-blur-sm rounded-xl p-1 md:p-1.5 flex flex-row items-center justify-between gap-1.5 w-full md:w-9/12 mx-auto">
+        <div className="border border-white/20 bg-white/10 backdrop-blur-sm rounded-xl p-1 md:p-1 flex flex-row items-center justify-between gap-1.5 w-full md:w-9/12 mx-auto">
           <input
             type="text"
             value={`🚀 Join me on Booka! Use my code ${waitlistData?.referralCode ?? ""} to get early access → https://www.bookacampus.com`}
             readOnly
-            className="bg-gray-100 text-black w-8/12 md:w-9/12 border border-[#3a3737] outline-none rounded-lg py-2.5 px-3 text-sm"
+            className="bg-gray-100 text-black w-7/12 md:w-9/12 border border-[#3a3737] outline-none rounded-lg py-2.5 px-3 text-sm"
           />
           <ShareReferralBtn referralCode={waitlistData?.referralCode ?? ""} />
         </div>

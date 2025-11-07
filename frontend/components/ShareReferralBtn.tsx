@@ -26,7 +26,7 @@ Join here: https://www.bookacampus.com`;
     <button
       onClick={handleShare}
       type="button"
-      className="flex justify-center items-center text-center font-bold hover:cursor-pointer bg-[#00C6FF] text-white py-2 px-3 rounded-md w-4/12 lg:w-3/12 hover:scale-102 duration-500"
+      className="flex justify-center text-sm items-center text-center font-bold hover:cursor-pointer bg-[#00C6FF] text-white py-2.5 px-2 rounded-md w-5/12 lg:w-3/12 hover:scale-102 duration-500"
     >
       {copied ? "Copied!" : "Copy Invite"}
     </button>
