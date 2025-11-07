@@ -15,11 +15,18 @@ dotenv.config();
 const app = express();
 
 // Core middleware
-const allowedOrigin = process.env.CLIENT_ORIGIN || process.env.FRONTEND_URL || "http://localhost:3000";
+// Build allowed origins from env vars and localhost; filter falsy values so undefined entries are removed.
+const allowedOrigins = [process.env.CLIENT_ORIGIN, process.env.FRONTEND_URL, "http://localhost:3000"].filter(Boolean) as string[];
 app.use(
   cors({
-    origin: allowedOrigin,
+    origin: (origin, callback) => {
+      // Allow non-browser requests like curl, server-to-server, or same-origin requests with no Origin.
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error(`CORS policy: origin ${origin} is not allowed by CORS`), false);
+    },
     credentials: true,
+    exposedHeaders: ["X-Request-Id"],
   })
 );
 app.use(express.json({ limit: "50mb" }));

@@ -3,18 +3,40 @@ import Image from "next/image";
 import Link from "next/link";
 import { BsTwitterX } from "react-icons/bs";
 import { useEffect, useState } from "react";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { useRouter } from "next/navigation";
-import { getUser, storeUser } from "@/action";
 import { GrAnalytics } from "react-icons/gr";
 import toast from "react-hot-toast";
 import Navbar from "@/components/Navbar";
+import { getUser, storeUser } from "@/utils";
+import { ExternalLink, LoaderCircle } from "lucide-react";
+
+interface WaitlistEntry {
+  id: string
+  email: string
+  referralCode: string
+  createdAt: string
+  parentCode: string | null
+}
+
+interface WaitlistResponse {
+  success: boolean
+  message: string
+  data?: {
+    waitlistEntry: WaitlistEntry
+  }
+  error?: {
+    entry?: WaitlistEntry
+  }
+}
 
 export default function Home() {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [hasReferral, setHasReferral] = useState<null | boolean>(null);
   const [referralCode, setReferralCode] = useState("");
+  const [secretCode, setSecretCode] = useState<string>(""); // 🆕
+  const [secretError, setSecretError] = useState<string | null>(null); // 🆕
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
@@ -22,54 +44,79 @@ export default function Home() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   if (!API_URL) {
-    throw new Error("❌ Missing API_URL environment variable");
+    throw new Error("Missing API_URL environment variable");
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const data = { email, refCode: hasReferral ? referralCode || "" : "" };
+    // Check secret code before submitting
+    if (step === 3) {
+      if (secretCode.trim() !== "5017") {
+        setSecretError("Incorrect code. Please try again.");
+        return;
+      }
+      setSecretError(null);
+    }
+
+    setIsSubmitting(true);
+    setMessage(null);
+
+    const payload = { email, refCode: hasReferral ? referralCode || "" : "" };
 
     try {
-      setIsSubmitting(true);
-
-      const res = await axios.post(
+      const res = await axios.post<WaitlistResponse>(
         `${API_URL}/api/waitlists/join`,
-        data
+        payload
       );
 
-      if (res.data.success) {
+      // handle new user case
+      if (res.data.success && res.data.data?.waitlistEntry) {
         const entry = res.data.data.waitlistEntry;
-        await storeUser(entry.id);
-        // success, redirect user to referral page
+        storeUser(entry.id);
         setMessage('🎉 Successfully joined the waitlist!');
         setTimeout(() => {
           router.push(`/referrals/${entry.id}`);
-        }, 1200);
-      } else {
-        setMessage(res.data.message || 'Something went wrong.');
-      }
+        }, 1000);
+        return;
+      } 
+
+      // Something else went wrong (non-success but not an Axios error)
+      setMessage(res.data.message || "Something went wrong.");
 
     } catch (error) {
-      const err = error as AxiosError<{ message?: string }>;
-      const errMsg = err.response?.data?.message || 'An error occurred. Please try again.';
-      setMessage(errMsg);
+      if (axios.isAxiosError(error)) {
+        // Handle already-existing user (409 Conflict)
+        if (error.response?.status === 409) {
+          const existingEntry = error.response.data?.error?.entry as WaitlistEntry | undefined;
+          if (existingEntry) {
+            storeUser(existingEntry.id);
+            setMessage("🎉 You're already on the waitlist!");
+            setTimeout(() => router.push(`/referrals/${existingEntry.id}`), 1000);
+            return;
+          }
+        }
+
+        // Other axios errors
+        const errMsg = error.response?.data?.message || "An error occurred. Please try again.";
+        setMessage(errMsg);
+      } else {
+        setMessage("Unexpected error occurred.");
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  // check for existing user on mount
   useEffect(() => {
-    async function fetchUser() {
-      try {
-        const id = await getUser();
-        setUserId(id);
-      } catch (error) {
-        console.error("Failed to get user:", error);
-      }
+    const existingUser = getUser();
+    if(existingUser) {
+      setUserId(existingUser);
+      router.push(`/referrals/${existingUser}`);
     }
-    fetchUser();
-  }, []);
+
+  }, [router]);
 
   return (
     <main className="bg-[#0A192F] text-white h-screen w-full overflow-hidden">
@@ -98,7 +145,7 @@ export default function Home() {
               Order textbooks with ease, not queues.
             </h1>
             <p className="w-11/12 text-base mt-4 mb-4">
-              A smarter way for students to get their textbooks faster and without the stress.
+              A smarter way for students to get their textbooks faster and without stress.
             </p>
 
             {/* Step 1 – Email input */}
@@ -171,11 +218,11 @@ export default function Home() {
                   className="bg-gray-100 text-black w-11/12 border border-[#3a3737] outline-none py-3 ps-3 rounded"
                 />
                 <button
-                  type="submit"
-                  disabled={isSubmitting}
+                  type="button"
+                  onClick={() => setStep(3)}
                   className="w-11/12 mt-4 bg-[#00C6FF] text-white py-3 px-3 rounded hover:scale-105 duration-500 uppercase font-normal text-base disabled:opacity-50"
                 >
-                  {isSubmitting ? 'Joining...' : 'Join Waitlist'}
+                  Continue
                 </button>
               </div>
             )}
@@ -187,11 +234,45 @@ export default function Home() {
                   No worries — you’re still on the list!
                 </p>
                 <button
-                  type="submit"
-                  disabled={isSubmitting}
+                  type="button"
+                  onClick={() => setStep(3)}
                   className="rounded w-full bg-[#00C6FF] py-3 hover:scale-105 hover:cursor-pointer duration-500 uppercase font-normal disabled:opacity-50"
                 >
-                  {isSubmitting ? 'Joining...' : 'Join Waitlist'}
+                  Continue
+                </button>
+              </div>
+            )}
+
+            {/* 🆕 Step 3 – Secret Code */}
+            {step === 3 && (
+              <div className="w-full mt-6 flex flex-col items-center">
+                <h2 className="text-[#00C6FF] text-xl md:text-2xl font-semibold uppercase bold-text mb-2">
+                  Enter Your Secret Code
+                </h2>
+                <Link href={'https://forms.gle/owgimo7N3eJS4x3t7'} target="_blank" className="mb-4 flex items-center justify-center gap-1 text-[#FFD166] underline underline-offset-2 hover:text-[#FFC166]/90 w-11/12">
+                  <ExternalLink className="h-4 w-4" />
+                  <span className="ms-1 text-sm md:text-xs lg:text-sm xl:text-xs">Click here to get code from waitlist form.</span>
+                </Link>
+
+                <input
+                  type="text"
+                  value={secretCode}
+                  onChange={(e) => setSecretCode(e.target.value)}
+                  placeholder="Enter your secret code"
+                  className="bg-gray-100 text-black w-11/12 border border-[#3a3737] outline-none py-3 ps-3 rounded"
+                />
+
+                {secretError && (
+                  <p className="w-11/12 text-red-400 text-sm mt-2">{secretError}</p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-11/12 mt-4 bg-[#00C6FF] text-white py-3 px-3 rounded hover:scale-105 duration-500 uppercase font-normal text-base disabled:opacity-50 flex gap-2 justify-center items-center"
+                >
+                  {isSubmitting && <LoaderCircle className="h-5 w-5 animate-spin" />}
+                  {isSubmitting ? "Joining..." : "Join Waitlist"}
                 </button>
               </div>
             )}
