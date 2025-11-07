@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Navbar() {
     return (
-        <nav className="z-50 w-full fixed top-0 text-black backdrop:blur-sm flex justify-between items-center py-6">
+        <nav className="bg-linear-to-br from-[#0A192F] to-transparent z-50 w-full fixed top-0 text-black backdrop:blur-sm flex justify-between items-center py-4">
             <div className="w-11/12 mx-auto flex justify-between items-center">
                 <Link href="/" aria-label="Home" className="">
                     <h1 className="text-[#00C6FF] text-lg font-bold bold-text">Booka</h1>
