@@ -11,7 +11,7 @@ export default function ShareReferralBtn({
   const handleShare = async () => {
     const message = `🚀 Join me and get early access to Booka — the easiest way to get your books online! 📚  
 Use my referral code: ${referralCode}  
-Join here: https://booka-org.vercel.app`;
+Join here: https://www.bookacampus.com`;
 
     try {
       await navigator.clipboard.writeText(message);
@@ -26,9 +26,9 @@ Join here: https://booka-org.vercel.app`;
     <button
       onClick={handleShare}
       type="button"
-      className="flex justify-center items-center text-center font-bold hover:cursor-pointer bg-[#00C6FF] text-white py-2 px-3 rounded-md w-5/12 lg:w-3/12 hover:scale-105 duration-500"
+      className="flex justify-center items-center text-center font-bold hover:cursor-pointer bg-[#00C6FF] text-white py-2 px-3 rounded-md w-4/12 lg:w-3/12 hover:scale-102 duration-500"
     >
-      {copied ? "Copied!" : "Share Invite"}
+      {copied ? "Copied!" : "Copy Invite"}
     </button>
   );
 }
