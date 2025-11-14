@@ -1,5 +1,5 @@
 import express, { Router } from "express";
-import { changeUniversityAdmin, createUniversity, deleteUniversity, editUniversity, getUniversities, getUniversityAdmin, getUniversityById, removeUniversityAdmin } from "./universities.controller";
+import { assignAdminToUniversity, changeUniversityAdmin, createUniversity, deleteUniversity, editUniversity, getUniversities, getUniversityAdmin, getUniversityById, removeUniversityAdmin } from "./universities.controller";
 import { isSuperAuthenticated } from "../../middlewares/isAuthenticated";
 
 const router: Router = express.Router();
@@ -12,5 +12,6 @@ router.delete("/delete-university/:id", isSuperAuthenticated, deleteUniversity);
 router.put("/change-university-admin", isSuperAuthenticated, changeUniversityAdmin);
 router.put("/remove-university-admin", isSuperAuthenticated, removeUniversityAdmin);
 router.get("/get-university-admin/:universityId", isSuperAuthenticated, getUniversityAdmin);
+router.put("/assign-admin", isSuperAuthenticated, assignAdminToUniversity);
 
 export default router;
