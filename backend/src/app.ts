@@ -3,8 +3,9 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import adminRouter from "./modules/admins";
+import waitlistRouter from "./modules/waitlists";
 import { errorHandler } from "./middlewares/errorHandler";
-import { APIError } from "./utils/error-handler";
+import { APIError } from "./utils/APIError";
 import dotenv from "dotenv";
 import { requestId } from "./middlewares/requestId";
 
@@ -14,11 +15,18 @@ dotenv.config();
 const app = express();
 
 // Core middleware
-const allowedOrigin = process.env.CLIENT_ORIGIN || process.env.FRONTEND_URL || "http://localhost:3000";
+// Build allowed origins from env vars and localhost; filter falsy values so undefined entries are removed.
+const allowedOrigins = [process.env.CLIENT_ORIGIN, process.env.FRONTEND_URL, "http://localhost:3000"].filter(Boolean) as string[];
 app.use(
   cors({
-    origin: allowedOrigin,
+    origin: (origin, callback) => {
+      // Allow non-browser requests like curl, server-to-server, or same-origin requests with no Origin.
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error(`CORS policy: origin ${origin} is not allowed by CORS`), false);
+    },
     credentials: true,
+    exposedHeaders: ["X-Request-Id"],
   })
 );
 app.use(express.json({ limit: "50mb" }));
@@ -33,7 +41,8 @@ app.get("/health", (_req: Request, res: Response) => {
 });
 
 // API routes
-app.use("/api/admins", adminRouter); // e.g. POST /api/admins/create-admin
+app.use("/api/admins", adminRouter);
+app.use("/api/waitlists", waitlistRouter);
 
 // 404 handler
 app.use((req: Request, _res: Response) => {

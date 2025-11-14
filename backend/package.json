@@ -4,9 +4,10 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
-    "build": "tsc"
+    "build": "npm install --include=dev && npx prisma generate && tsc",
+    "migrate": "npx prisma migrate deploy",
+    "start": "npm run migrate && node dist/app.js"
   },
   "repository": {
     "type": "git",
@@ -42,7 +43,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^24.7.2",
+    "@types/node": "^24.9.1",
     "@types/nodemailer": "^7.0.2",
     "prisma": "^6.17.1",
     "ts-node-dev": "^2.0.0",
