@@ -179,3 +179,24 @@ export const getUniversityAdmin = async (req: Request, res: Response) => {
 
     return APIResponse.success(res, "University admin retrieved successfully", { admin }, 200);
 }
+
+export const assignAdminToUniversity = async (req: Request, res: Response) => {
+    const { universityId, adminId } = req.body;
+
+    const university = await prisma.university.findUnique({ where: { id: universityId } });
+    if (!university) {
+        throw APIError.NotFound("University not found");
+    }
+
+    const admin = await prisma.admin.findUnique({ where: { id: adminId } });
+    if (!admin) {
+        throw APIError.NotFound("Admin not found");
+    }
+
+    const updatedUniversity = await prisma.university.update({
+        where: { id: universityId },
+        data: { adminId }
+    });
+
+    return APIResponse.success(res, "Admin assigned to university successfully", { university: updatedUniversity }, 200);
+}
