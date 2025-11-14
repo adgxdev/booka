@@ -24,4 +24,11 @@ export const CreateAdminDTO = z.object({
 	role: z.enum(["super", "manager"]).default("manager")
 });
 
+export const CreateUniversitiesDTO = z.object({
+	name: z.string(),
+	email: z.email(),
+	phoneNumber: z.string().min(10).max(11),
+	role: z.enum(["super", "manager"]).default("manager")
+});
+
 export type CreateAdminInput = z.infer<typeof CreateAdminDTO>;
