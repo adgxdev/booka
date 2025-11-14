@@ -46,3 +46,74 @@ export const getUniversities = async (req: Request, res: Response) => {
 
     return APIResponse.success(res, "Universities retrieved successfully", { universities }, 200);
 }
+
+export const getUniversityById = async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const university = await prisma.university.findUnique({
+        where: { id },
+        select: {
+            id: true,
+            name: true,
+            createdAt: true,
+            updatedAt: true
+        }
+    });
+
+    if (!university) {
+        throw APIError.NotFound("University not found");
+    }
+
+    return APIResponse.success(res, "University retrieved successfully", { university }, 200);
+}
+
+export const editUniversity = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { name } = req.body;
+
+    const university = await prisma.university.findUnique({ where: { id } });
+    if (!university) {
+        throw APIError.NotFound("University not found");
+    }
+
+    const updatedUniversity = await prisma.university.update({
+        where: { id },
+        data: { name }
+    });
+
+    return APIResponse.success(res, "University updated successfully", { university: updatedUniversity }, 200);
+}
+
+export const deleteUniversity = async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const university = await prisma.university.findUnique({ where: { id } });
+    if (!university) {
+        throw APIError.NotFound("University not found");
+    }
+
+    await prisma.university.delete({ where: { id } });
+
+    return APIResponse.success(res, "University deleted successfully", { university }, 200);
+}
+
+export const changeUniversityAdmin = async (req: Request, res: Response) => {
+    const { universityId, adminId } = req.body;
+
+    const university = await prisma.university.findUnique({ where: { id: universityId } });
+    if (!university) {
+        throw APIError.NotFound("University not found");
+    }
+
+    const admin = await prisma.admin.findUnique({ where: { id: adminId } });
+    if (!admin) {
+        throw APIError.NotFound("Admin not found");
+    }
+
+    const updatedUniversity = await prisma.university.update({
+        where: { id: universityId },
+        data: { adminId }
+    });
+
+    return APIResponse.success(res, "University admin changed successfully", { university: updatedUniversity }, 200);
+}
