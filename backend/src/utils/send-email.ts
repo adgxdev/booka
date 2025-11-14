@@ -5,10 +5,11 @@ config();
 
 const orgName = 'Booka';
 
+const smtpPort = Number(process.env.SMTP_PORT);
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: false, // true for 465, false for other ports
+  port: smtpPort,
+  secure: smtpPort === 465, // enforce TLS when using port 465
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -18,10 +19,9 @@ const transporter = nodemailer.createTransport({
 export async function sendCustomEmail({ to, subject, text, html }: { to: string; subject: string; text: string; html: string }) {
   console.log('[Email] Attempting to send email with config:', {
     host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT),
-    secure: false,
+    port: smtpPort,
+    secure: smtpPort === 465,
     user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
   });
 
   try {

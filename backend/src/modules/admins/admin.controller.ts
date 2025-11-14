@@ -26,14 +26,34 @@ export const createAdmin = async (req: Request, res: Response) => {
 
     if (!existingAdmin) {
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newAdmin = await prisma.admin.create({
+
+        // Create first, then attempt email; delete on failure so admin isn't persisted without notification.
+        const createdAdmin = await prisma.admin.create({
             data: {
                 name,
                 email,
                 password: hashedPassword,
                 phoneNumber,
                 role: role as any
-            },
+            }
+        });
+
+        try {
+            const emailContent = getAdminWelcomeEmail({ full_name: name, email, password });
+            await sendCustomEmail({ to: email, ...emailContent });
+        } catch (err) {
+            // Roll back: remove the just-created admin if email fails
+            try {
+                await prisma.admin.delete({ where: { id: createdAdmin.id } });
+            } catch (cleanupErr) {
+                console.error('Failed to rollback admin after email failure:', cleanupErr);
+            }
+            throw APIError.Internal('Failed to send admin welcome email; admin was not created');
+        }
+
+        // Return selected projection
+        const projection = await prisma.admin.findUnique({
+            where: { id: createdAdmin.id },
             select: {
                 id: true,
                 name: true,
@@ -45,13 +65,7 @@ export const createAdmin = async (req: Request, res: Response) => {
             }
         });
 
-        if (newAdmin) {
-            // Send email with credentials
-            const emailContent = getAdminWelcomeEmail({ full_name: name, email, password });
-            await sendCustomEmail({ to: email, ...emailContent });
-        }
-
-        return APIResponse.success(res, "Admin created successfully", { admin: newAdmin }, 201);
+        return APIResponse.success(res, "Admin created successfully", { admin: projection }, 201);
     }
 }
 
