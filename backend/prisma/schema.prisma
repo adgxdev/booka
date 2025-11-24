@@ -19,6 +19,7 @@ model Admin {
   createdAt   DateTime   @default(now()) @db.Timestamptz(6)
   updatedAt   DateTime   @updatedAt @db.Timestamptz(6)
   AuditLog    AuditLog[]
+  universities University[] @relation("AdminUniversities")
 }
 
 model University {
@@ -28,6 +29,8 @@ model University {
   createdAt DateTime   @default(now()) @db.Timestamptz(6)
   updatedAt DateTime   @updatedAt @db.Timestamptz(6)
   AuditLog  AuditLog[]
+  adminId   String?
+  admin     Admin?     @relation("AdminUniversities", fields: [adminId], references: [id])
 }
 
 model AuditLog {
