@@ -3,8 +3,11 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import adminRouter from "./modules/admins";
+import universityRouter from "./modules/universities";
+import userRouter from "./modules/users";
 import waitlistRouter from "./modules/waitlists";
 import { errorHandler } from "./middlewares/errorHandler";
+import booksRouter from "./modules/books";
 import { APIError } from "./utils/APIError";
 import dotenv from "dotenv";
 import { requestId } from "./middlewares/requestId";
@@ -42,7 +45,10 @@ app.get("/health", (_req: Request, res: Response) => {
 
 // API routes
 app.use("/api/admins", adminRouter);
+app.use("/api/universities", universityRouter);
+app.use("/api/users", userRouter);
 app.use("/api/waitlists", waitlistRouter);
+app.use("/api/books", booksRouter);
 
 // 404 handler
 app.use((req: Request, _res: Response) => {

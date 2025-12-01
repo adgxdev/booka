@@ -2,6 +2,7 @@ import { NextFunction, Response, Request } from "express";
 import jwt, { TokenExpiredError } from "jsonwebtoken";
 import prisma from "../configs/prisma";
 import { AdminJwtPayload, SafeAdmin, AdminRole } from "../modules/admins/admin.type";
+import { SafeUser } from "../modules/users/user.type";
 
 // Shared core verifier
 const verifyAdmin = async (
@@ -67,9 +68,55 @@ export const isSuperAuthenticated = (
     next: NextFunction
 ) => verifyAdmin(req, res, next, ["super"]);
 
+// Operator authenticated (operator only)
+export const isOperatorAuthenticated = (
+    req: Request & { admin?: SafeAdmin; role?: string },
+    res: Response,
+    next: NextFunction
+) => verifyAdmin(req, res, next, ["operator"]);
+
 // Either manager or super (if needed elsewhere)
 export const isAnyAdminAuthenticated = (
     req: Request & { admin?: SafeAdmin; role?: string },
     res: Response,
     next: NextFunction
-) => verifyAdmin(req, res, next, ["manager", "super"]);
+) => verifyAdmin(req, res, next, ["manager", "super", "operator"]);
+
+// User authentication (access token)
+export const isUserAuthenticated = async (
+    req: Request & { user?: SafeUser },
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const bearer = req.headers.authorization;
+        const headerToken = bearer && bearer.startsWith("Bearer ") ? bearer.slice(7) : undefined;
+        const token = req.cookies["userAccessToken"] || headerToken;
+
+        if (!token) {
+            return res.status(401).json({ message: "Unauthorized: user token missing" });
+        }
+
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as { id?: string };
+        if (!decoded.id) {
+            return res.status(401).json({ message: "Unauthorized: invalid token" });
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { id: decoded.id },
+            select: { id: true, name: true, email: true, universityId: true }
+        });
+
+        if (!user) {
+            return res.status(401).json({ message: "Unauthorized: user not found" });
+        }
+
+        req.user = user;
+        return next();
+    } catch (err: any) {
+        if (err instanceof TokenExpiredError) {
+            return res.status(401).json({ message: "User token expired", code: "TOKEN_EXPIRED" });
+        }
+        return res.status(401).json({ message: "Unauthorized: invalid or malformed token" });
+    }
+};
