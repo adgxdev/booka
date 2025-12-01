@@ -1,0 +1,20 @@
+{
+  "name": "booka",
+  "version": "1.0.0",
+  "description": "**Booka** is a digital textbook ordering and delivery platform designed for Nigerian universities. It streamlines the process of searching, purchasing, and receiving textbooks, while providing administrative tools for schools and logistics tracking for delivery agents.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/getbooka/booka.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/getbooka/booka/issues"
+  },
+  "homepage": "https://github.com/getbooka/booka#readme"
+}
