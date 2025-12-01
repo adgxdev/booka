@@ -1,9 +1,11 @@
 import express, { Router } from "express";
-import { assignAdminToUniversity, changeUniversityAdmin, createUniversity, deleteUniversity, editUniversity, getUniversities, getUniversityAdmin, getUniversityById, removeUniversityAdmin } from "./universities.controller";
+import { assignAdminToUniversity, changeUniversityAdmin, createUniversity, deleteUniversity, deleteUniversityLogo, editUniversity, getUniversities, getUniversityAdmin, getUniversityById, removeUniversityAdmin, uploadUniversityLogo } from "./universities.controller";
 import { isSuperAuthenticated } from "../../middlewares/isAuthenticated";
 
 const router: Router = express.Router();
 
+router.post("/upload-university-logo", isSuperAuthenticated, uploadUniversityLogo);
+router.delete("/delete-university-logo", isSuperAuthenticated, deleteUniversityLogo);
 router.post("/create-university", isSuperAuthenticated, createUniversity);
 router.get("/get-universities", getUniversities);
 router.get("/get-university/:id", getUniversityById);

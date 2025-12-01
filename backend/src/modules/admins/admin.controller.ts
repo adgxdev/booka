@@ -7,7 +7,7 @@ import bcrypt from "bcryptjs";
 import { setCookie } from "../../utils/cookies/setCookies";
 import { AdminJwtPayload, CreateAdminDTO } from "./admin.type";
 import { APIError } from "../../utils/APIError";
-import { APIResponse } from "../../utils/APIResponse";
+import { APIResponse } from "../../utils/APIResponse"; 
 
 
 //Create admin
@@ -90,13 +90,24 @@ export const loginAdmin = async (req: Request, res: Response) => {
 
     const isProduction = process.env.NODE_ENV === "production";
 
-    // Clear admin, user and seller cookies before setting new ones
+    // Clear admin and usercookies before setting new ones
     res.clearCookie("adminAccessToken", {
         httpOnly: true,
         secure: isProduction,
         sameSite: isProduction ? "none" : "lax"
     });
     res.clearCookie("adminRefreshToken", {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax"
+    });
+
+    res.clearCookie("userAccessToken", {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax"
+    });
+    res.clearCookie("userRefreshToken", {
         httpOnly: true,
         secure: isProduction,
         sameSite: isProduction ? "none" : "lax"
@@ -193,7 +204,7 @@ export const refreshAdminToken = async (req: Request, res: Response) => {
     }
 
     // Ensure the role in DB matches allowed roles (manager/super)
-    if (admin.role !== "manager" && admin.role !== "super") {
+    if (admin.role !== "manager" && admin.role !== "super" && admin.role !== "operator") {
         throw APIError.Forbidden("Invalid role");
     }
 
@@ -285,4 +296,57 @@ export const getPersonalAdminInfo = async (req: any, res: Response, next: NextFu
     }
 
     return APIResponse.success(res, "Admin info fetched successfully", { admin }, 200);
+}
+
+export const deleteAdmin = async (req: Request, res: Response) => {
+    const { adminId } = req.params;
+
+    const admin = await prisma.admin.findUnique({ where: { id: adminId } });
+    if (!admin) {
+        throw APIError.NotFound("Admin not found");
+    }
+
+    await prisma.admin.delete({ where: { id: adminId } });
+
+    return APIResponse.success(res, "Admin deleted successfully", { admin }, 200);
+}
+
+export const getAllAdmins = async (req: Request, res: Response) => {
+    const admins = await prisma.admin.findMany({
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            phoneNumber: true,
+            role: true,
+            universities: true,
+            createdAt: true,
+            updatedAt: true,
+        }
+    });
+
+    return APIResponse.success(res, "Admins fetched successfully", { admins }, 200);
+}
+
+export const getAdminById = async (req: Request, res: Response) => {
+    const { adminId } = req.params;
+
+    const admin = await prisma.admin.findUnique({ 
+        where: { id: adminId },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            phoneNumber: true,
+            role: true,
+            universities: true,
+            createdAt: true,
+            updatedAt: true,
+        }
+    });
+    if (!admin) {
+        throw APIError.NotFound("Admin not found");
+    }
+
+    return APIResponse.success(res, "Admin fetched successfully", { admin }, 200);
 }
