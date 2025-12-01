@@ -1,18 +1,61 @@
 import jwt from "jsonwebtoken";
 import prisma from "../../configs/prisma";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { slugify } from "../../utils/helper";
 import { APIError } from "../../utils/APIError";
 import { APIResponse } from "../../utils/APIResponse";
+import { imagekit } from "../../utils/imagekit";
+import { UploadUniversityDTO } from "./universities.type";
+
+//Upload image
+export const uploadUniversityLogo = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { fileName } = req.body
+        // Extract mime type from base64 string
+        const matches = fileName.match(/^data:(image\/[a-zA-Z0-9+]+);base64,/);
+        const mimeType = matches ? matches[1] : "image/jpeg";
+        const extension = mimeType.split("/")[1];
+        console.log('uploadUniversityLogo:', { mimeType, extension, fileName: fileName.slice(0, 30) });
+        const response = await imagekit.upload({
+            file: fileName,
+            fileName: `university-logo-${Date.now()}.${extension}`,
+            folder: "/universities",
+        })
+        res.status(201).json({
+            file_url: response.url,
+            file_name: response.fileId,
+        })
+    } catch (error) {
+        console.error('uploadBookImage error:', error);
+        next(error)
+    }
+}
+
+//Delete Image
+export const deleteUniversityLogo = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { fileId } = req.body
+        const response = await imagekit.deleteFile(fileId)
+
+        res.status(201).json({
+            success: true,
+            response
+        })
+    } catch (error) {
+        console.error('deleteUniversityLogo error:', error);
+        next(error)
+    }
+}
 
 export const createUniversity = async (req: Request, res: Response) => {
-    const { name } = req.body;
+    const body = UploadUniversityDTO.parse(req.body);
+    const { name, abbreviation, state, city, logoUrl, logoFileId } = body;
 
     if (!name || typeof name !== 'string') {
         throw APIError.BadRequest("University name is required");
     }
 
-    const slug = slugify(name);
+    const slug = slugify(abbreviation);
 
     const existingSlug = await prisma.university.findUnique({ where: { slug } });
     if (existingSlug) {
@@ -20,7 +63,7 @@ export const createUniversity = async (req: Request, res: Response) => {
     }
 
     const newUniversity = await prisma.university.create({
-        data: { name, slug },
+        data: { name, slug, state, city, logoUrl, logoFileId },
         select: {
             id: true,
             name: true,
@@ -39,6 +82,10 @@ export const getUniversities = async (req: Request, res: Response) => {
             id: true,
             name: true,
             slug: true,
+            state: true,    
+            city: true,
+            logoUrl: true,
+            logoFileId: true,
             createdAt: true,
             updatedAt: true
         }
@@ -56,6 +103,10 @@ export const getUniversityById = async (req: Request, res: Response) => {
             id: true,
             name: true,
             slug: true,
+            state: true,    
+            city: true,
+            logoUrl: true,
+            logoFileId: true,
             createdAt: true,
             updatedAt: true
         }
@@ -70,7 +121,7 @@ export const getUniversityById = async (req: Request, res: Response) => {
 
 export const editUniversity = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { name } = req.body;
+    const { name, abbreviation, state, city, logoUrl, logoFileId } = req.body;
 
     const university = await prisma.university.findUnique({ where: { id } });
     if (!university) {
@@ -81,7 +132,7 @@ export const editUniversity = async (req: Request, res: Response) => {
         throw APIError.BadRequest("University name is required");
     }
 
-    const newSlug = slugify(name);
+    const newSlug = slugify(abbreviation);
     const slugExists = await prisma.university.findFirst({
         where: { slug: newSlug, NOT: { id } }
     });
@@ -91,11 +142,15 @@ export const editUniversity = async (req: Request, res: Response) => {
 
     const updatedUniversity = await prisma.university.update({
         where: { id },
-        data: { name, slug: newSlug },
+        data: { name, slug: newSlug, state, city, logoUrl, logoFileId },
         select: {
             id: true,
             name: true,
             slug: true,
+            state: true,    
+            city: true,
+            logoUrl: true,
+            logoFileId: true,
             createdAt: true,
             updatedAt: true
         }

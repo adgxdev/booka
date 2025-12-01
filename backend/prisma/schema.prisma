@@ -1,36 +1,77 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Admin {
-  id          String     @id @default(uuid())
-  name        String
-  email       String     @unique
-  phoneNumber String
-  role        AdminRole  @default(manager)
-  password    String
-  commissions Int?
-  lastUpdate  DateTime?
-  createdAt   DateTime   @default(now()) @db.Timestamptz(6)
-  updatedAt   DateTime   @updatedAt @db.Timestamptz(6)
-  AuditLog    AuditLog[]
+  id           String       @id @default(uuid())
+  name         String
+  email        String       @unique
+  phoneNumber  String
+  role         AdminRole    @default(manager)
+  password     String
+  commissions  Int?
+  lastUpdate   DateTime?
+  createdAt    DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime     @updatedAt @db.Timestamptz(6)
+  AuditLog     AuditLog[]
   universities University[] @relation("AdminUniversities")
+  books        Book[]
 }
 
 model University {
   id        String     @id @default(uuid())
   name      String
+  state     String
+  city      String
   slug      String     @unique
-  createdAt DateTime   @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime   @updatedAt @db.Timestamptz(6)
+  logoUrl     String
+  logoFileId  String
   AuditLog  AuditLog[]
   adminId   String?
   admin     Admin?     @relation("AdminUniversities", fields: [adminId], references: [id])
+  users     User[]
+  books     Book[]
+  createdAt DateTime   @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime   @updatedAt @db.Timestamptz(6)
+}
+
+model User {
+  id           String     @id @default(uuid())
+  name         String
+  email        String     @unique
+  phoneNumber  String
+  department   String
+  level        Int
+  password     String
+  universityId String
+  university   University @relation(fields: [universityId], references: [id])
+  createdAt    DateTime   @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime   @updatedAt @db.Timestamptz(6)
+}
+ 
+model Book {
+  id           String     @id @default(uuid())
+  title        String
+  author       String
+  edition      String?
+  price        Float      @default(0)
+  quantity     Int        @default(0)
+  lowAlert     Int        @default(0)
+  imageUrl     String
+  imageFileId  String
+  status       BookStatus @default(draft)
+  universityId String
+  adminId      String
+  createdAt    DateTime   @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime   @updatedAt @db.Timestamptz(6)
+
+  university   University @relation(fields: [universityId], references: [id])
+  admin        Admin      @relation(fields: [adminId], references: [id])
 }
 
 model AuditLog {
@@ -61,6 +102,7 @@ model Waitlist {
 enum AdminRole {
   manager
   super
+  operator
 }
 
 enum Entity {
@@ -82,4 +124,9 @@ enum AuduitLogLevel {
   info
   warning
   error
+}
+
+enum BookStatus {
+  draft
+  published
 }

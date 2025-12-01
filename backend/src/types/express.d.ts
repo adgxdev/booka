@@ -7,5 +7,6 @@ declare module 'express-serve-static-core' {
     role?: SafeAdmin['role'];
     university?: { id: string; name: string };
     id?: string;
+    user?: { id: string; name: string; email: string; universityId: string };
   }
 }

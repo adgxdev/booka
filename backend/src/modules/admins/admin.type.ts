@@ -1,6 +1,6 @@
 import z from "zod";
 
-export type AdminRole = 'manager' | 'super';
+export type AdminRole = 'manager' | 'super' | 'operator';
 
 export interface SafeAdmin {
 	id: string;
@@ -21,7 +21,7 @@ export const CreateAdminDTO = z.object({
 	name: z.string(),
 	email: z.email(),
 	phoneNumber: z.string().min(10).max(11),
-	role: z.enum(["super", "manager"]).default("manager")
+	role: z.enum(["super", "manager", "operator"]).default("manager")
 });
 
 export const CreateUniversitiesDTO = z.object({

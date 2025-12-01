@@ -25,7 +25,7 @@ export const sanitizeWaitlist = (waitlist: WaitlistWithRelations): SafeWaitlist 
         referralCode: waitlist.referralCode,
         parentCode: waitlist.parentCode,
         createdAt: waitlist.createdAt,
-    };
+    }; 
 
     // If relations are loaded, sanitize them too
     if (waitlist.referredBy) {
@@ -41,7 +41,7 @@ export const sanitizeWaitlist = (waitlist: WaitlistWithRelations): SafeWaitlist 
     }
 
     if (waitlist.referrals) {
-        base.referrals = waitlist.referrals.map((r) => ({
+        base.referrals = waitlist.referrals.map((r: Waitlist) => ({
             id: r.id,
             email: r.email,
             referralCode: r.referralCode,
