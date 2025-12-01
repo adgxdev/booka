@@ -52,7 +52,7 @@ export default function Home() {
 
     // Check secret code before submitting
     if (step === 3) {
-      if (secretCode.trim() !== "5017") {
+      if (secretCode.trim() !== "BK-A92F7") {
         setSecretError("Incorrect code. Please try again.");
         return;
       }
