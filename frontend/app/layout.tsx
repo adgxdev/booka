@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Poppins } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 import { boldFont } from "./font";
 import { Toaster } from "react-hot-toast";
@@ -7,13 +7,8 @@ import { Toaster } from "react-hot-toast";
 const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
-  weight: ["100", "200", "300"],
+  weight: ["100", "300", "400", "600", "800", "900"],
   display: "swap",
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
@@ -78,7 +73,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${poppins.className} ${geistMono.variable} ${boldFont.variable} antialiased`}
+        className={`${poppins.className} ${boldFont.variable} antialiased`}
       >
         {children}
         <Toaster position="top-center" toastOptions={{
