@@ -9,9 +9,9 @@ export default function ShareReferralBtn({
   const [copied, setCopied] = useState(false);
 
   const handleShare = async () => {
-    const message = `🚀 Join me and get early access to Booka — the easiest way to get your books online! 📚  
-Use my referral code: ${referralCode}  
-Join here: https://www.bookacampus.com`;
+    const message = `Join me and get early access to Booka — the easiest way to get your books online!  
+    Use my referral code: ${referralCode}  
+    Join here: https://www.bookacampus.com/waitlist?ref=${referralCode}`;
 
     try {
       await navigator.clipboard.writeText(message);
@@ -26,7 +26,7 @@ Join here: https://www.bookacampus.com`;
     <button
       onClick={handleShare}
       type="button"
-      className="flex justify-center text-sm items-center text-center font-semibold hover:cursor-pointer bg-[#00C6FF] text-white py-2.5 px-2 rounded-md w-5/12 lg:w-3/12 hover:scale-102 duration-500"
+      className="flex justify-center text-sm items-center text-center font-semibold hover:cursor-pointer bg-blue text-white py-2.5 px-2 rounded-md w-5/12 lg:w-3/12 hover:scale-102 duration-500"
     >
       {copied ? "Copied!" : "Copy Invite"}
     </button>
