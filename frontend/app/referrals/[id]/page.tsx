@@ -1,4 +1,3 @@
-
 import ErrorFragment from "@/components/referrals/ErrorFragment";
 import ReferralBox from "@/components/referrals/ReferralBox";
 import axios from "axios";
