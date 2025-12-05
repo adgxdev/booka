@@ -16,9 +16,20 @@ body {
   --color-yellow: #FFD166;
 }
 
-.bg {
-  background-image: url(../public/images/hero-bg.webp);
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: top right;
+button {
+  cursor: pointer !important;
+}
+
+.aurora-container {
+  width: 100%;
+  height: 100%;
+}
+
+.aurora-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
 }
