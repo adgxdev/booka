@@ -1,22 +1,28 @@
-import nodemailer from 'nodemailer';
+// import nodemailer from 'nodemailer';
 import { config } from "dotenv";
+
+import { Resend } from 'resend';
+
+const resend = new Resend('re_B41sP1Be_Hpd85Y9kzsLqtK3SBo8qJCGy');
+
+
 
 config();
 
 const orgName = 'Booka';
 
 const smtpPort = Number(process.env.SMTP_PORT);
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: smtpPort,
-  secure: smtpPort === 465, // enforce TLS when using port 465
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+// const transporter = nodemailer.createTransport({
+//   host: process.env.SMTP_HOST,
+//   port: smtpPort,
+//   secure: smtpPort === 465, // enforce TLS when using port 465
+//   auth: {
+//     user: process.env.SMTP_USER,
+//     pass: process.env.SMTP_PASS,
+//   },
+// });
 
-export async function sendCustomEmail({ to, subject, text, html }: { to: string; subject: string; text: string; html: string }) {
+export async function sendCustomEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
   console.log('[Email] Attempting to send email with config:', {
     host: process.env.SMTP_HOST,
     port: smtpPort,
@@ -25,14 +31,23 @@ export async function sendCustomEmail({ to, subject, text, html }: { to: string;
   });
 
   try {
-    const result = await transporter.sendMail({
+    // const result = await transporter.sendMail({
+    //   from: `"${orgName}" <${process.env.SMTP_USER}>`,
+    //   to,
+    //   subject,
+    //   text,
+    //   html,
+    // });
+    // console.log('[Email] Email sent successfully:', result.messageId);
+
+    const result = await resend.emails.send({
       from: `"${orgName}" <${process.env.SMTP_USER}>`,
-      to,
+      to: [to],
       subject,
-      text,
       html,
     });
-    console.log('[Email] Email sent successfully:', result.messageId);
+
+
     return result;
   } catch (error) {
     console.error('[Email] Failed to send email:', error);
