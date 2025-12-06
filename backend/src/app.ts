@@ -60,7 +60,7 @@ app.use(errorHandler);
 
 // Start server only if this file is the entry point (avoid auto-start in tests)
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3001;
-if (process.env.NODE_ENV !== "test") {
+if (process.env.NODE_ENV !== "test" && process.env.VERCEL !== "1") {
   app.listen(PORT, () => {
     // eslint-disable-next-line no-console
     console.log(`API server listening on http://localhost:${PORT}`);
