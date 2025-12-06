@@ -68,7 +68,7 @@ export function waitlistEmail({ email, id }: { email: string, id: string }) {
       <p>You have been added to the waitlist on <b>${orgName}</b>.</p>
       
       <p>We need one more favour from you</p></br>
-      <p> Please fill out this <a href="https://docs.google.com/forms/d/e/1FAIpQLScbLWJNyqLpvAKy1qgLrT91qw0u1Pn8B4SEK8W-AlNNQgcbqw/viewform?usp=header"> waitlist form </a> for extra waitlist benefits</p>
+      <p> Please fill out this <a href="https://forms.gle/owgimo7N3eJS4x3t7"> waitlist form </a> for extra waitlist benefits</p>
       <br/>
       <a href="${process.env.CLIENT_ORIGIN}/referrals/${id}"> Track your referrals </a>
       <p>Thank you!</p>
