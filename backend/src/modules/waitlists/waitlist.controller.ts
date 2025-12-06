@@ -5,6 +5,7 @@ import prisma from "../../configs/prisma";
 import { APIError } from "../../utils/APIError";
 import { APIResponse } from "../../utils/APIResponse";
 import { logger } from "../../utils/logger";
+import { sendCustomEmail, waitlistEmail } from "../../utils/send-email";
 // import { sendCustomEmail, waitlistEmail } from "../../utils/send-email";
 
 export const createWaitlist = async (req: Request, res: Response) => {
@@ -65,8 +66,8 @@ export const createWaitlist = async (req: Request, res: Response) => {
         type: "create",
         requestId: req.id
     });
-    // const emailContent = waitlistEmail({ email: waitlistEntry.email, id: waitlistEntry.id });
-    // await sendCustomEmail({ to: email, ...emailContent });
+    const emailContent = waitlistEmail({ email: waitlistEntry.email, id: waitlistEntry.id });
+    await sendCustomEmail({ to: email, ...emailContent });
     // 5️⃣ Response
     return APIResponse.success(res, "Waitlist entry created successfully.", {
         waitlistEntry: sanitizeWaitlist(waitlistEntry)
