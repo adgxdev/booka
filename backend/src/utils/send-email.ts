@@ -38,7 +38,7 @@ export async function sendCustomEmail({ to, subject, html }: { to: string; subje
     //   text,
     //   html,
     // });
-    // console.log('[Email] Email sent successfully:', result.messageId);
+
 
     const result = await resend.emails.send({
       from: `"${orgName}" <${process.env.SMTP_USER}>`,
@@ -46,7 +46,7 @@ export async function sendCustomEmail({ to, subject, html }: { to: string; subje
       subject,
       html,
     });
-
+    console.log('[Email] Email sent successfully:', result.data?.id);
 
     return result;
   } catch (error) {
@@ -79,7 +79,7 @@ export function waitlistEmail({ email, id }: { email: string, id: string }) {
   const text = `Hello\n\nYou have been added to waitlist on ${orgName}.\n\nYour login email: ${email}\n\nPlease fill out this form to secure your spot.\n\nThank you!`;
   const html = `
     <!DOCTYPE html>
-      <html lang="en">
+    <html lang="en">
       <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -209,7 +209,7 @@ export function waitlistEmail({ email, id }: { email: string, id: string }) {
 
         </div>
       </body>
-      </html>
+    </html>
 
   `;
   return { subject, text, html };
