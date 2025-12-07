@@ -75,6 +75,7 @@ export function getAdminWelcomeEmail({ full_name, email, password }: { full_name
 }
 
 export function waitlistEmail({ email, id }: { email: string, id: string }) {
+  console.log(`waitlist link sent: ${id}`);
   const subject = `Welcome to ${orgName}`;
   const text = `Hello\n\nYou have been added to waitlist on ${orgName}.\n\nYour login email: ${email}\n\nPlease fill out this form to secure your spot.\n\nThank you!`;
   const html = `
