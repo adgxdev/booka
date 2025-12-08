@@ -8,7 +8,7 @@ export default function Navbar() {
     const [open, setOpen] = useState(false);
     return (
         <nav className="bg-black/5 border-b border-white/10 backdrop-blur-sm z-50 w-full text-white py-4 fixed top-0">
-            <header className="w-11/12 mx-auto flex items-center justify-between">
+            <header className="max-w-[1440px] w-11/12 mx-auto flex items-center justify-between">
                 <Link href={'/'} className="text-lg font-bold tracking-wide">
                     <Image src='/logo/booka.png' alt="booka" className="" width={90} height={10} />
                 </Link>
