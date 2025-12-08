@@ -22,7 +22,7 @@ export default function HomePage() {
                     speed={0.5}
                     />
                 </div>
-                <div className="flex flex-col md:flex-row items-center w-11/12 mx-auto h-auto md:h-full">
+                <div className="flex flex-col md:flex-row items-center w-11/12 mx-auto h-auto md:h-screen">
                     <div className="h-full w-full md:w-7/12 flex flex-col justify-center md:py-24 pt-24 pb-12">
                         <h1 className="text-5xl md:text-8xl font-semibold md:leading-22 tracking-tighter">
                             <span className="text-2xl md:text-5xl tracking-tighter">Order textbooks</span>
@@ -37,8 +37,8 @@ export default function HomePage() {
                         </Link>
                     </div>
                     <div className="relative w-full md:w-5/12 flex justify-center pt-12">
-                        <div className="h-96 md:h-auto w-full md:w-6/12">
-                          <Image src="/images/phonet.png" alt="hero" width={600} height={600} className="object-cover object-top w-full h-full md:rotate-35" />  
+                        <div className="h-96 md:h-auto w-full md:w-6/12 2xl:w-8/12">
+                          <Image src="/images/phonet.png" alt="hero" width={600} height={600} className="object-cover object-top w-full h-full" />  
                         </div>
                         <div className="md:hidden absolute h-full w-full -bottom-2 bg-gradient-to-b from-transparent via-transparent to-[#0A192F] md:to-transparent">
                         </div>
