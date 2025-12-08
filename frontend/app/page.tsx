@@ -22,7 +22,7 @@ export default function HomePage() {
                     speed={0.5}
                     />
                 </div>
-                <div className="flex flex-col md:flex-row items-center w-11/12 mx-auto h-auto md:h-screen">
+                <div className="flex flex-col md:flex-row items-center w-11/12 mx-auto h-screen md:h-screen">
                     <div className="h-full w-full md:w-7/12 flex flex-col justify-center md:py-24 pt-24 pb-12 items-center md:items-start text-center md:text-left">
                         <h1 className="text-5xl md:text-8xl font-semibold md:leading-22 tracking-tighter">
                             <span className="text-2xl md:text-5xl tracking-tighter">Order textbooks</span>
