@@ -1,5 +1,5 @@
 import z from "zod";
-import { Waitlist } from "@prisma/client";
+import { Waitlist } from "../../generated/prisma/client";
 
 
 export type SafeWaitlist = {
@@ -25,7 +25,7 @@ export const sanitizeWaitlist = (waitlist: WaitlistWithRelations): SafeWaitlist 
         referralCode: waitlist.referralCode,
         parentCode: waitlist.parentCode,
         createdAt: waitlist.createdAt,
-    }; 
+    };
 
     // If relations are loaded, sanitize them too
     if (waitlist.referredBy) {
