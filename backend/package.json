@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/booka-org/booka#readme",
   "dependencies": {
+    "@prisma/adapter-pg": "^7.1.0",
     "@prisma/client": "^7.0.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/nodemailer": "^7.0.2",
@@ -35,6 +36,7 @@
     "imagekit": "^6.0.0",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^7.0.9",
+    "resend": "^6.5.2",
     "winston": "^3.18.3",
     "zod": "^4.1.12"
   },

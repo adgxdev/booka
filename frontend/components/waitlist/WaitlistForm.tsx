@@ -4,7 +4,7 @@ import Image from "next/image";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { getUser, storeUser } from "@/utils";
-import { ExternalLink, LoaderCircle } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import Link from "next/link";
 import { GrAnalytics } from "react-icons/gr";
 import toast from "react-hot-toast";
@@ -34,8 +34,6 @@ export default function WaitlistForm({ slug }: { slug: string }) {
   const [email, setEmail] = useState("");
   const [hasReferral, setHasReferral] = useState<null | boolean>(null);
   const [referralCode, setReferralCode] = useState(slug);
-  const [secretCode, setSecretCode] = useState<string>("");
-  const [secretError, setSecretError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
@@ -58,16 +56,6 @@ export default function WaitlistForm({ slug }: { slug: string }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Check secret code before submitting
-    if (step === 3) {
-      if (secretCode.trim() !== "BK-A92F7") {
-        setSecretError("Incorrect code. Please try again.");
-        return;
-      }
-      setSecretError(null);
-    }
-
     setIsSubmitting(true);
     setMessage(null);
 
@@ -136,7 +124,7 @@ export default function WaitlistForm({ slug }: { slug: string }) {
             width={500}
             height={500}
             className="h-fit xl:h-11/12 xl:w-fit border"
-            alt="booka app"
+            alt="booka's app"
           />
         </div>
       </div>
@@ -237,11 +225,12 @@ export default function WaitlistForm({ slug }: { slug: string }) {
                 className="bg-gray-100 text-black w-11/12 border border-[#3a3737] outline-none py-3 ps-3 rounded"
               />
               <button
-                type="button"
-                onClick={() => setStep(3)}
-                className="w-11/12 mt-4 bg-[#00C6FF] text-white py-3 px-3 rounded hover:scale-105 duration-500 uppercase font-normal text-base disabled:opacity-50"
+                type="submit"
+                disabled={isSubmitting}
+                className="w-11/12 mt-4 bg-[#00C6FF] text-white py-3 px-3 rounded hover:scale-105 duration-500 uppercase font-normal text-base disabled:opacity-50 flex gap-2 justify-center items-center"
               >
-                Continue
+                {isSubmitting && <LoaderCircle className="h-5 w-5 animate-spin" />}
+                {isSubmitting ? "Joining..." : "Join Waitlist"}
               </button>
             </div>
           )}
@@ -252,40 +241,6 @@ export default function WaitlistForm({ slug }: { slug: string }) {
               <p className="text-gray-400 text-sm italic mb-2">
                 No worries — you’re still on the list!
               </p>
-              <button
-                type="button"
-                onClick={() => setStep(3)}
-                className="rounded w-full bg-[#00C6FF] py-3 hover:scale-105 hover:cursor-pointer duration-500 uppercase font-normal disabled:opacity-50"
-              >
-                Continue
-              </button>
-            </div>
-          )}
-
-          {/* 🆕 Step 3 – Secret Code */}
-          {step === 3 && (
-            <div className="w-full mt-6 flex flex-col items-center">
-              <p className="w-11/12 text-sm text-gray-300 mb-4">
-                Enter the <span className="text-yellow">**secret code**</span> you received after filling the waitlist form, This helps us verify your spot and unlock your{" "}
-                <span className="text-[#FFD166]">Booka Points</span>!
-              </p>
-              <Link href={'https://forms.gle/owgimo7N3eJS4x3t7'} target="_blank" className="mb-4 flex items-center justify-center gap-1 text-[#FFD166] underline underline-offset-2 hover:text-[#FFC166]/90 w-11/12">
-                <ExternalLink className="h-4 w-4" />
-                <span className="ms-1 text-sm md:text-xs lg:text-sm xl:text-xs">Click here to get code from waitlist form.</span>
-              </Link>
-
-              <input
-                type="text"
-                value={secretCode}
-                onChange={(e) => setSecretCode(e.target.value)}
-                placeholder="Enter your secret code"
-                className="bg-gray-100 text-black w-11/12 border border-[#3a3737] outline-none py-3 ps-3 rounded"
-              />
-
-              {secretError && (
-                <p className="w-11/12 text-red-400 text-sm mt-2">{secretError}</p>
-              )}
-
               <button
                 type="submit"
                 disabled={isSubmitting}
