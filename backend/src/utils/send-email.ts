@@ -81,137 +81,90 @@ export function waitlistEmail({ email, id }: { email: string, id: string }) {
   const html = `
     <!DOCTYPE html>
     <html lang="en">
-      <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Booka Waitlist</title>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Welcome to Booka Waitlist</title>
       <style>
         body {
+          background-color: #f4f4f4;
+          font-family: Arial, sans-serif;
+          line-height: 1.6;
+          color: #333;
           margin: 0;
           padding: 0;
-          background-color: #f8f9fc;
-          font-family: Arial, Helvetica, sans-serif;
         }
-
         .container {
           max-width: 600px;
-          margin: auto;
-          background: #ffffff;
-          padding: 30px;
+          margin: 20px auto;
+          background-color: #ffffff;
           border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          overflow: hidden;
         }
-
-        h1 {
-          color: #111;
-          font-size: 24px;
-          margin-bottom: 16px;
-        }
-
-        p {
-          color: #333;
-          line-height: 1.6;
-          font-size: 15px;
-          margin-bottom: 16px;
-        }
-
-        .btn {
-          display: inline-block;
-          background-color: #0057ff;
-          color: #ffffff !important;
-          padding: 12px 18px;
-          text-decoration: none;
-          border-radius: 6px;
-          margin: 10px 0;
-          font-size: 15px;
-        }
-
-        .section-title {
-          font-weight: bold;
-          font-size: 18px;
-          margin-top: 30px;
-        }
-
-        ul {
-          padding-left: 18px;
-          margin-top: 12px;
-          color: #333;
-        }
-
-        .footer {
-          margin-top: 30px;
-          font-size: 13px;
-          color: #666;
+        .header {
+          padding: 30px;
           text-align: center;
         }
+        .header h1 {
+          margin: 0;
+          font-size: 28px;
+        }
+        .content {
+          padding: 30px;
+        }
+        .content p {
+          margin: 15px 0;
+        }
+        .button {
+          display: inline-block;
+          padding: 12px 30px;
+          background-color: #667eea;
+          color: white;
+          text-decoration: none;
+          border-radius: 4px;
+          margin: 10px 0;
+          font-weight: bold;
+        }
+        .button:hover {
+          background-color: #764ba2;
+        }
+        .footer {
+          padding: 20px;
+          text-align: center;
+          font-size: 14px;
+          color: #666;
+          border-top: 1px solid #ddd;
+        }
       </style>
-      </head>
-
-      <body>
-        <div class="container">
-
-          <h1>Welcome to the ${orgName} Waitlist! 🎉</h1>
-
-          <p>You’re officially on the <strong>Booka waitlist</strong>, and we’re excited to have you with us!</p>
-
-          <p>
-            To complete your registration and help us understand you better,
-            please fill out this short form:
-          </p>
-
-          <a class="btn" href="https://docs.google.com/forms/d/e/1FAIpQLScbLWJNyqLpvAKy1qgLrT91qw0u1Pn8B4SEK8W-AlNNQgcbqw/viewform" target="_blank">
-            Fill Out the Form
-          </a>
-
-          <p class="section-title">Join the Pre-Launch Community 👇🏼</p>
-
-          <a class="btn" href="https://chat.whatsapp.com/D3DN4fPrFa6HZGiF6Sh7Td" target="_blank" style="background:#25D366;">
-            Join WhatsApp Community
-          </a>
-           <a class="btn" href="${process.env.CLIENT_ORIGIN}/referrals/${id}"> Track your referrals </a>
-
-          <p class="section-title">📢 BOOKA EARLY REFERRAL PROGRAM — How It Works</p>
-
-          <p>Earn exclusive rewards just by inviting your friends!</p>
-
-          <p><strong>How to earn rewards:</strong></p>
-          <ul>
-            <li>Join the Booka waitlist → you receive your unique referral link.</li>
-            <li>Share your link privately or publicly (WhatsApp groups, friends, classmates).</li>
-            <li>Once <strong>5 real students</strong> sign up using your link, you instantly unlock:
-              <strong>Early Access + ₦500 Book Credit</strong> (redeemable after launch).
-            </li>
-          </ul>
-
-          <p class="section-title">Bonus Reward Levels 🎁</p>
-
-          <ul>
-            <li><strong>15 referrals</strong> → Free book delivery or higher book discounts + ₦1,000 Book Credit</li>
-            <li><strong>30 referrals</strong> → Become a Booka Campus Brand Ambassador + exclusive merch + early opportunities</li>
-          </ul>
-
-          <p class="section-title">⚠ Referral Rules ⚠</p>
-
-          <ul>
-            <li>Only real student signups count (no duplicates, fake emails, or fake names).</li>
-            <li>Referrals must complete the full waitlist form for it to count.</li>
-            <li>The Top 20 referrers get a chance to become Booka Campus Ambassadors.</li>
-          </ul>
-
-          <p>
-            Lastly, reply with the <strong>secret code</strong> you see after submitting the form
-            to claim instant Booka Points (redeemable after launch).
-          </p>
-
-          <p>See you at the top ✊🏼</p>
-
-          <div class="footer">
-            © 2025 Booka — All Rights Reserved.
-          </div>
-
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Welcome to the Booka Waitlist! 🎉</h1>
         </div>
-      </body>
-    </html>
+        <div class="content">
+          <p>You're officially on the Booka waitlist and we're excited to have you with us!</p>
 
+          <p>To complete your registration and help us understand you better, please fill out this short form:</p>
+          <a href="https://docs.google.com/forms/d/e/1FAIpQLScbLWJNyqLpvAKy1qgLrT91qw0u1Pn8B4SEK8W-AlNNQgcbqw/viewform" >Fill Out Form</a>
+
+          <p>Join the pre-launch community for information that will be dropping:</p>
+          <a href="https://chat.whatsapp.com/D3DN4fPrFa6HZGiF6Sh7Td" >Join WhatsApp Community</a>
+
+          <p>Track your referrals and rewards:</p>
+          <a href="${process.env.CLIENT_ORIGIN}/referrals/${id}" >Track Referral</a>
+
+          <p>Lastly, reply with the secret code you see after submitting the form to claim instant Booka Points which is redeemable after launch.</p>
+
+          <p><strong>Team Booka</strong><br>Welcome to the future of book purchasing in African universities.</p>
+        </div>
+        <div class="footer">
+          <p>&copy; 2025 Booka. All rights reserved.</p>
+        </div>
+      </div>
+    </body>
+   </html>
   `;
   return { subject, text, html };
 } 

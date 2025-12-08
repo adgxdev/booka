@@ -110,10 +110,8 @@ export default function WaitlistForm({ slug }: { slug: string }) {
     const existingUser = getUser();
     if(existingUser) {
       setUserId(existingUser);
-      router.push(`/referrals/${existingUser}`);
     }
-
-  }, [router]);
+  }, []);
   return (
     <div className="py-24 xl:py-0 relative w-11/12 mx-auto h-full flex flex-col md:flex-row justify-center items-center">
       {/* Left side image */}
