@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function ShareReferralBtn({
   referralCode,
@@ -16,6 +17,9 @@ export default function ShareReferralBtn({
     try {
       await navigator.clipboard.writeText(message);
       setCopied(true);
+      toast("Referral link copied to clipboard!", {
+        icon: "✅",
+      });
       setTimeout(() => setCopied(false), 2500);
     } catch (err) {
       console.error("Failed to copy:", err);

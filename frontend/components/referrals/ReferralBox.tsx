@@ -22,10 +22,10 @@ export default function ReferralBox({ waitlistData, referrals }: ReferralBoxProp
       <Navbar />
 
       <div className="w-11/12 md:w-9/12 mx-auto text-center">
-        <FaGift className="text-[#FFD166] h-20 w-20 mx-auto mb-3 animate-bounce" />
+        <FaGift className="text-[#FFD166] h-16 w-16 mx-auto mb-3 animate-bounce" />
 
-        <h1 className="text-lg md:text-3xl font-bold bold-text text-[#00C6FF]">
-          Booka Early Referral Program 🎉
+        <h1 className="text-lg md:text-3xl font-bold text-[#00C6FF]">
+          Booka Early Referral Program
         </h1>
         <p className="text-sm md:text-base mt-2 mb-5 text-gray-300">
           Invite your friends, unlock early access, and earn exclusive Booka rewards!

@@ -2,12 +2,27 @@
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Navbar() {
     const [open, setOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+        setScrolled(window.scrollY > 10);
+        };
+
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
     return (
-        <nav className="bg-black/5 border-b border-white/10 backdrop-blur-sm z-50 w-full text-white py-4 fixed top-0">
+        <nav
+        className={`fixed top-0 w-full z-50 py-4 transition-all duration-300 
+            ${scrolled ? "bg-black/30 backdrop-blur-md border-white/10 border-b" : "bg-transparent border-none border-transparent"
+        }`}
+        >
             <header className="max-w-[1440px] w-11/12 mx-auto flex items-center justify-between">
                 <Link href={'/'} className="text-lg font-bold tracking-wide">
                     <Image src='/logo/booka.png' alt="booka" className="" width={90} height={10} />
@@ -24,11 +39,11 @@ export default function Navbar() {
             </header>
             {/* Mobile Menu Drawer */}
             <div
-                className={`fixed top-0 right-0 h-68 rounded-b-3xl w-full bg-[#0A192F]/70 backdrop-blur-sm border-b border-white/10 shadow-xl transform transition-transform duration-300 md:hidden ${
-                open ? "translate-y-0" : "-translate-y-full"
+                className={`fixed top-0 right-0 h-screen rounded-b-3xl w-full bg-[#0A192F] backdrop-blur-sm border-b border-white/10 shadow-xl transform transition-transform duration-300 md:hidden ${
+                open ? "translate-x-0" : "translate-x-full"
                 }`}
             >
-                <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+                <div className="flex items-center justify-between px-5 py-4">
                     <Link href={'/'} className="text-lg font-bold tracking-wide">
                         <Image src='/logo/booka.png' alt="booka" className="" width={90} height={10} />
                     </Link>
@@ -37,7 +52,7 @@ export default function Navbar() {
                     </button>
                 </div>
 
-                <div className="flex flex-col items-start gap-6 text-sm px-6 font-medium mt-4">
+                <div className="flex flex-col items-start gap-6 text-sm px-6 font-medium mt-8">
                 <Link onClick={() => setOpen(false)} href="#" className="hover:text-blue duration-300">
                     About
                 </Link>
@@ -51,7 +66,7 @@ export default function Navbar() {
                 <Link
                     onClick={() => setOpen(false)}
                     href="/waitlist"
-                    className="w-full bg-blue text-white rounded-md py-2.5 px-4 font-semibold text-center hover:scale-105 duration-300"
+                    className="fixed right-0 bottom-0 w-full bg-blue text-white text-base py-6 px-4 font-semibold text-center hover:scale-105 duration-300"
                 >
                     Join the Waitlist
                 </Link>
