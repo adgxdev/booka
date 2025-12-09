@@ -113,15 +113,15 @@ export default function WaitlistForm({ slug }: { slug: string }) {
     }
   }, []);
   return (
-    <div className="py-24 xl:py-0 relative w-11/12 mx-auto h-full flex flex-col md:flex-row justify-center items-center">
+    <div className="max-w-[1440px] py-24 xl:py-0 relative w-11/12 mx-auto h-full flex flex-col md:flex-row justify-center items-center">
       {/* Left side image */}
-      <div className="opacity-90 xl:opacity-100 h-full w-full xl:w-6/12 flex items-center justify-center xl:justify-end">
-        <div className="h-full xl:w-8/12 flex md:items-center justify-end">
+      <div className="opacity-95 xl:opacity-100 h-full w-full xl:w-6/12 flex items-center justify-center xl:justify-end">
+        <div className="w-full xl:w-7/12 flex xl:items-center justify-end">
           <Image
-            src="/images/phonet.png"
+            src="/images/heromk.png"
             width={500}
             height={500}
-            className="h-fit xl:h-11/12 xl:w-fit border"
+            className="w-full h-fit lg:w-fit xl:h-11/12 xl:w-fit 2xl:h-6/12"
             alt="booka's app"
           />
         </div>
@@ -140,10 +140,10 @@ export default function WaitlistForm({ slug }: { slug: string }) {
                 <h1>You&apos;ve been invited with referral code: <span className="text-yellow">{slug}</span></h1>
               </div>
             )}
-            <h1 className="w-11/12 xl:w-full bold-text text-[#00C6FF] text-2xl md:text-2xl lg:text-3xl xl:text-2xl font-semibold uppercase leading-7">
-              Order textbooks with ease, not queues.
+            <h1 className="w-11/12 xl:w-full text-blue tracking-tighter text-3xl max-[321px]:text-2xl max-[321px]:leading-6 md:text-3xl lg:text-4xl xl:text-4xl font-bold leading-7">
+              Order textbooks with <br className="md:hidden"/>ease, not queues.
             </h1>
-            <p className="w-11/12 text-base mt-4 mb-4">
+            <p className="w-11/12 text-base leading-5 mt-4 mb-4">
               A smarter way for students to get their textbooks faster and without stress.
             </p>
           </>
@@ -165,7 +165,9 @@ export default function WaitlistForm({ slug }: { slug: string }) {
                 onClick={() => {
                   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                   if (!emailPattern.test(email)) {
-                    alert("Please enter a valid email address.");
+                    toast("Please enter a valid email address.", {
+                      icon: "⚠️",
+                    });
                     return;
                   }
                   setStep(2);
@@ -181,7 +183,7 @@ export default function WaitlistForm({ slug }: { slug: string }) {
           {/* Step 2 – Referral Question */}
           {step === 2 && hasReferral === null && (
             <div className="mt-4 w-11/12 flex flex-col items-center">
-              <h2 className="text-[#00C6FF] text-xl md:text-2xl font-semibold uppercase bold-text mb-2">
+              <h2 className="text-[#00C6FF] tracking-tighter text-3xl md:text-3xl font-bold mb-2">
                 Were You Referred?
               </h2>
               <p className="text-base text-gray-300 mb-4">
@@ -210,7 +212,7 @@ export default function WaitlistForm({ slug }: { slug: string }) {
           {/* Step 2B – Referral Code Input */}
           {step === 2 && hasReferral === true && (
             <div className="w-full mt-6 flex flex-col items-center">
-              <p className="text-base text-gray-300 mb-4">
+              <p className="font-bold text-xl max-[321px]:text-lg text-gray-300 mb-4">
                 Enter your friend’s referral code. <br/>you’ll both earn{" "}
                 <span className="text-[#FFD166]">Booka Points</span>!
               </p>
@@ -236,7 +238,7 @@ export default function WaitlistForm({ slug }: { slug: string }) {
           {/* Step 2C – No referral */}
           {step === 2 && hasReferral === false && (
             <div className="mt-6 w-11/12 flex flex-col items-center">
-              <p className="text-gray-400 text-sm italic mb-2">
+              <p className="text-gray-400 text-lg md:text-lg font-bold italic mb-2">
                 No worries — you’re still on the list!
               </p>
               <button
