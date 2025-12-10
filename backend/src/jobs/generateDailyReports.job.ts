@@ -41,7 +41,7 @@ export async function generateDailyReportsJob() {
             }
 
             // Get all orders scheduled for yesterday
-            const orders: Order[] = await prisma.order.findMany({
+            const orders = await prisma.order.findMany({
                 where: {
                     universityId: university.id,
                     fulfillmentDate: {
@@ -78,7 +78,7 @@ export async function generateDailyReportsJob() {
             // Agent performance
             const agentStats = new Map<string, { agentId: string, agentName: string, commissions: number, successfulDeliveries: number, successfulPickups: number }>();
 
-            for (const order of orders) {
+            orders.forEach(order => {
                 if (order.agentId && order.agent) {
                     const existing = agentStats.get(order.agentId) || {
                         agentId: order.agentId,
@@ -99,7 +99,7 @@ export async function generateDailyReportsJob() {
 
                     agentStats.set(order.agentId, existing);
                 }
-            }
+            });
 
             const agentPerformance = Array.from(agentStats.values());
 

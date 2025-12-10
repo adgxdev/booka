@@ -49,7 +49,7 @@ export async function generateWeeklyReportsJob() {
             }
 
             // Get all orders for last week
-            const orders: Order[] = await prisma.order.findMany({
+            const orders = await prisma.order.findMany({
                 where: {
                     universityId: university.id,
                     fulfillmentDate: {

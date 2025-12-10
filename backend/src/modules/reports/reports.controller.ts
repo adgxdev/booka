@@ -254,7 +254,7 @@ export const listWeeklyReports = async (req: Request, res: Response, next: NextF
     const totalPages = Math.ceil(totalReports / itemsPerPage);
 
     return APIResponse.success(res, "Weekly reports list retrieved successfully", {
-        items: (reports as DailyReport[]).map(r => ({
+        items: reports.map(r => ({
             weekStart: r.weekStartDate.toISOString().split('T')[0],
             weekEnd: r.weekEndDate.toISOString().split('T')[0],
             totalOrders: r.totalOrdersScheduled,
@@ -308,7 +308,7 @@ export const listMonthlyReports = async (req: Request, res: Response, next: Next
     const totalPages = Math.ceil(totalReports / itemsPerPage);
 
     return APIResponse.success(res, "Monthly reports list retrieved successfully", {
-        items: (reports as DailyReport[]).map(r => ({
+        items: reports.map(r => ({
             month: r.reportMonth.toISOString().split('T')[0].substring(0, 7),
             totalOrders: r.totalOrdersScheduled,
             completedPickups: r.completedPickups,
@@ -647,7 +647,7 @@ export const listSuperAdminWeeklyReports = async (req: Request, res: Response, n
             id: university.id,
             name: university.name
         },
-        items: (reports as DailyReport[]).map(r => ({
+        items: reports.map(r => ({
             weekStart: r.weekStartDate.toISOString().split('T')[0],
             weekEnd: r.weekEndDate.toISOString().split('T')[0],
             totalOrders: r.totalOrdersScheduled,
@@ -716,7 +716,7 @@ export const listSuperAdminMonthlyReports = async (req: Request, res: Response, 
             id: university.id,
             name: university.name
         },
-        items: (reports as DailyReport[]).map(r => ({
+        items: reports.map(r => ({
             month: r.reportMonth.toISOString().split('T')[0].substring(0, 7),
             totalOrders: r.totalOrdersScheduled,
             completedPickups: r.completedPickups,

@@ -44,7 +44,7 @@ export async function generateMonthlyReportsJob() {
             }
 
             // Get all orders for last month (1st to last day)
-            const orders: Order[] = await prisma.order.findMany({
+            const orders = await prisma.order.findMany({
                 where: {
                     universityId: university.id,
                     fulfillmentDate: {
