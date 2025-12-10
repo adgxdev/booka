@@ -56,9 +56,10 @@ export async function sendCustomEmail({ to, subject, html }: { to: string; subje
 }
 
 // Example usage for patient password email:
-export function getAdminWelcomeEmail({ full_name, email, password }: { full_name: string; email: string; password: string }) {
+export function getAdminWelcomeEmail({ full_name, email, password, adminAppUrl }: { full_name: string; email: string; password: string; adminAppUrl?: string }) {
+  const appLink = adminAppUrl || 'https://admin.booka.app';
   const subject = `Welcome to ${orgName}`;
-  const text = `Hello ${full_name},\n\nYou have been registered as an admin on ${orgName}.\n\nYour login email: ${email}\nYour temporary password: ${password}\n\nPlease log in and change your password as soon as possible.\n\nThank you!`;
+  const text = `Hello ${full_name},\n\nYou have been registered as an admin on ${orgName}.\n\nYour login email: ${email}\nYour temporary password: ${password}\n\nPlease log in and change your password as soon as possible.\n\nAccess the admin dashboard: ${appLink}\n\nThank you!`;
   const html = `
     <div style="font-family: Arial, sans-serif;">
       <h2>Welcome to ${orgName}</h2>
@@ -67,6 +68,7 @@ export function getAdminWelcomeEmail({ full_name, email, password }: { full_name
       <p><b>Your login email:</b> ${email}<br/>
          <b>Your temporary password:</b> <span style="font-family:monospace;">${password}</span></p>
       <p>Please log in and change your password as soon as possible.</p>
+      <p><a href="${appLink}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">Access Admin Dashboard</a></p>
       <br/>
       <p>Thank you!</p>
     </div>
@@ -165,6 +167,44 @@ export function waitlistEmail({ email, id }: { email: string, id: string }) {
       </div>
     </body>
    </html>
+  `;
+  return { subject, text, html };
+}
+
+export function getAgentSignupEmail({ full_name, email, password, agentAppUrl }: { full_name: string; email: string; password: string; agentAppUrl?: string }) {
+  const appLink = agentAppUrl || 'https://test.app.com';
+  const subject = `Welcome to ${orgName} - Agent Application Received`;
+  const text = `Hello ${full_name},\n\nThank you for signing up as a delivery agent on ${orgName}.\n\nYour application is currently pending approval. You will receive another email once your account has been reviewed and approved.\n\nYour login email: ${email}\nYour password: ${password}\n\nDownload the agent app: ${appLink}\n\nThank you!`;
+  const html = `
+    <div style="font-family: Arial, sans-serif;">
+      <h2>Welcome to ${orgName}</h2>
+      <p>Hello <strong>${full_name}</strong>,</p>
+      <p>Thank you for signing up as a delivery agent on <b>${orgName}</b>.</p>
+      <p>Your application is currently <b>pending approval</b>. You will receive another email once your account has been reviewed and approved.</p>
+      <p><b>Your login email:</b> ${email}<br/>
+         <b>Your password:</b> <span style="font-family:monospace;">${password}</span></p>
+      <p><a href="${appLink}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">Download Agent App</a></p>
+      <br/>
+      <p>Thank you!</p>
+    </div>
+  `;
+  return { subject, text, html };
+}
+
+export function getAgentApprovalEmail({ full_name, agentAppUrl }: { full_name: string; agentAppUrl?: string }) {
+  const appLink = agentAppUrl || 'https://test.app.com';
+  const subject = `Congratulations! Your ${orgName} Agent Account has been Approved`;
+  const text = `Hello ${full_name},\n\nCongratulations! Your delivery agent account on ${orgName} has been approved.\n\nYou can now log in and start accepting delivery orders.\n\nDownload the agent app: ${appLink}\n\nThank you!`;
+  const html = `
+    <div style="font-family: Arial, sans-serif;">
+      <h2>Congratulations!</h2>
+      <p>Hello <strong>${full_name}</strong>,</p>
+      <p>Your delivery agent account on <b>${orgName}</b> has been <b>approved</b>! 🎉</p>
+      <p>You can now log in and start accepting delivery orders.</p>
+      <p><a href="${appLink}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">Download Agent App</a></p>
+      <br/>
+      <p>Thank you for joining our team!</p>
+    </div>
   `;
   return { subject, text, html };
 } 

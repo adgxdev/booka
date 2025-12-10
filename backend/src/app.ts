@@ -3,14 +3,19 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import adminRouter from "./modules/admins";
+import agentsRouter from "./modules/agents";
+import booksRouter from "./modules/books";
+import configsRouter from "./modules/configs"
+import ordersRouter from "./modules/orders";
+import reportsRouter from "./modules/reports";
 import universityRouter from "./modules/universities";
 import userRouter from "./modules/users";
 import waitlistRouter from "./modules/waitlists";
 import { errorHandler } from "./middlewares/errorHandler";
-import booksRouter from "./modules/books";
 import { APIError } from "./utils/APIError";
 import dotenv from "dotenv";
 import { requestId } from "./middlewares/requestId";
+import { initializeCronJobs } from "./jobs";
 
 dotenv.config();
 
@@ -45,10 +50,14 @@ app.get("/health", (_req: Request, res: Response) => {
 
 // API routes
 app.use("/api/admins", adminRouter);
+app.use("/api/agents", agentsRouter);
+app.use("/api/books", booksRouter);
+app.use("/api/configs", configsRouter);
+app.use("/api/orders", ordersRouter);
+app.use("/api/reports", reportsRouter);
 app.use("/api/universities", universityRouter);
 app.use("/api/users", userRouter);
 app.use("/api/waitlists", waitlistRouter);
-app.use("/api/books", booksRouter);
 
 // 404 handler
 app.use((req: Request, _res: Response) => {
@@ -57,6 +66,11 @@ app.use((req: Request, _res: Response) => {
 
 // Centralized error handler
 app.use(errorHandler);
+
+// Initialize cron jobs
+if (process.env.NODE_ENV !== "test") {
+  initializeCronJobs();
+}
 
 // Start server only if this file is the entry point (avoid auto-start in tests)
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3001;

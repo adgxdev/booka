@@ -8,6 +8,7 @@ export interface SafeAdmin {
 	email: string;
 	role: AdminRole;
 	commissions: number | null;
+	universityId?: string | null;
 }
 
 export interface AdminJwtPayload {

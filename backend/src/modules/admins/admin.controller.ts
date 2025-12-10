@@ -5,6 +5,7 @@ import { generateRandomPassword } from "../../utils/helper";
 import { sendCustomEmail, getAdminWelcomeEmail } from '../../utils/send-email';
 import bcrypt from "bcryptjs";
 import { setCookie } from "../../utils/cookies/setCookies";
+import { clearAuthCookies } from "../../utils/cookies/clearAuthCookies";
 import { AdminJwtPayload, CreateAdminDTO } from "./admin.type";
 import { APIError } from "../../utils/APIError";
 import { APIResponse } from "../../utils/APIResponse"; 
@@ -39,7 +40,13 @@ export const createAdmin = async (req: Request, res: Response) => {
         });
 
         try {
-            const emailContent = getAdminWelcomeEmail({ full_name: name, email, password });
+            // Get admin app URL from config
+            const adminAppConfig = await prisma.config.findUnique({
+                where: { key: "admin_app_url" }
+            });
+            const adminAppUrl = adminAppConfig?.value || 'https://admin.booka.app';
+
+            const emailContent = getAdminWelcomeEmail({ full_name: name, email, password, adminAppUrl });
             await sendCustomEmail({ to: email, ...emailContent });
         } catch (err) {
             // Roll back: remove the just-created admin if email fails
@@ -88,30 +95,8 @@ export const loginAdmin = async (req: Request, res: Response) => {
         throw APIError.BadRequest("Invalid email or password");
     }
 
-    const isProduction = process.env.NODE_ENV === "production";
-
-    // Clear admin and usercookies before setting new ones
-    res.clearCookie("adminAccessToken", {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "lax"
-    });
-    res.clearCookie("adminRefreshToken", {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "lax"
-    });
-
-    res.clearCookie("userAccessToken", {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "lax"
-    });
-    res.clearCookie("userRefreshToken", {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "lax"
-    });
+    // Clear all auth cookies before setting new ones
+    clearAuthCookies(res);
 
     const accessToken = jwt.sign(
         {
@@ -222,21 +207,7 @@ export const refreshAdminToken = async (req: Request, res: Response) => {
 };
 
 export const logoutAdmin = async (req: Request, res: Response, next: NextFunction) => {
-    const isProduction = process.env.NODE_ENV === "production";
-
-    // Clear the cookies with consistent settings
-    res.clearCookie("adminAccessToken", {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "lax"
-    });
-
-    res.clearCookie("adminRefreshToken", {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "lax"
-    });
-
+    clearAuthCookies(res);
     return APIResponse.success(res, "Logged out successfully");
 }
 
@@ -319,7 +290,7 @@ export const getAllAdmins = async (req: Request, res: Response) => {
             email: true,
             phoneNumber: true,
             role: true,
-            universities: true,
+            universityId: true,
             createdAt: true,
             updatedAt: true,
         }
@@ -339,7 +310,7 @@ export const getAdminById = async (req: Request, res: Response) => {
             email: true,
             phoneNumber: true,
             role: true,
-            universities: true,
+            universityId: true,
             createdAt: true,
             updatedAt: true,
         }

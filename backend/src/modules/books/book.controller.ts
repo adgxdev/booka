@@ -52,13 +52,13 @@ export const createBook = async (req: Request, res: Response) => {
     const adminId = req.admin?.id;
     if (!adminId) throw APIError.Unauthorized("Unauthorized");
 
-    const university = await prisma.university.findFirst({ where: { adminId }, select: { id: true } });
-    if (!university) throw APIError.BadRequest("No university assigned to this admin");
+    const admin = await prisma.admin.findUnique({ where: { id: adminId }, select: { universityId: true } });
+    if (!admin?.universityId) throw APIError.BadRequest("No university assigned to this admin");
 
     // Check for duplicate book (same title + edition within the same university)
     const existing = await prisma.book.findFirst({
         where: {
-            universityId: university.id,
+            universityId: admin.universityId,
             title: { equals: title, mode: 'insensitive' },
             ...(edition !== undefined
                 ? { edition: { equals: edition, mode: 'insensitive' } }
@@ -80,7 +80,7 @@ export const createBook = async (req: Request, res: Response) => {
             lowAlert,
             imageUrl,
             imageFileId,
-            universityId: university.id,
+            universityId: admin.universityId,
             adminId,
         },
     });
@@ -95,8 +95,8 @@ export const updateBook = async (req: Request, res: Response) => {
     const adminId = req.admin?.id;
     if (!adminId) throw APIError.Unauthorized("Unauthorized");
 
-    const university = await prisma.university.findFirst({ where: { adminId }, select: { id: true } });
-    if (!university) throw APIError.BadRequest("No university assigned to this admin");
+    const admin = await prisma.admin.findUnique({ where: { id: adminId }, select: { universityId: true } });
+    if (!admin?.universityId) throw APIError.BadRequest("No university assigned to this admin");
 
     const updatedBook = await prisma.book.update({
         where: { id: req.params.id },
@@ -109,7 +109,7 @@ export const updateBook = async (req: Request, res: Response) => {
             lowAlert,
             imageUrl,
             status: "draft",
-            universityId: university.id,
+            universityId: admin.universityId,
             adminId,
         }
     })
@@ -121,13 +121,13 @@ export const deleteBook = async (req: Request, res: Response) => {
     const adminId = req.admin?.id;
     if (!adminId) throw APIError.Unauthorized("Unauthorized");
 
-    const university = await prisma.university.findFirst({ where: { adminId }, select: { id: true } });
-    if (!university) throw APIError.BadRequest("No university assigned to this admin");
+    const admin = await prisma.admin.findUnique({ where: { id: adminId }, select: { universityId: true } });
+    if (!admin?.universityId) throw APIError.BadRequest("No university assigned to this admin");
 
     const bookId = req.params.id;
 
     const book = await prisma.book.findFirst({
-        where: { id: bookId, universityId: university.id },
+        where: { id: bookId, universityId: admin.universityId },
         select: { id: true, imageFileId: true },
     });
     if (!book) throw APIError.NotFound("Book not found");
@@ -146,8 +146,8 @@ export const getBooksForAdmin = async (req: Request, res: Response) => {
     const adminId = req.admin?.id;
     if (!adminId) throw APIError.Unauthorized("Unauthorized");
 
-    const university = await prisma.university.findFirst({ where: { adminId }, select: { id: true } });
-    if (!university) throw APIError.BadRequest("No university assigned to this admin");
+    const admin = await prisma.admin.findUnique({ where: { id: adminId }, select: { universityId: true } });
+    if (!admin?.universityId) throw APIError.BadRequest("No university assigned to this admin");
 
     const q = (req.query.q as string) || "";
     const page = Math.max(parseInt((req.query.page as string) || "1", 10), 1);
@@ -161,7 +161,7 @@ export const getBooksForAdmin = async (req: Request, res: Response) => {
     const order = sortOrderRaw === "asc" ? "asc" : "desc";
 
     const where = {
-        universityId: university.id,
+        universityId: admin.universityId,
         ...(q
             ? {
                 OR: [
@@ -255,11 +255,11 @@ export const getDraftBooks = async (req: Request, res: Response) => {
     const adminId = req.admin?.id;
     if (!adminId) throw APIError.Unauthorized("Unauthorized");
 
-    const university = await prisma.university.findFirst({ where: { adminId }, select: { id: true } });
-    if (!university) throw APIError.BadRequest("No university assigned to this admin");
+    const admin = await prisma.admin.findUnique({ where: { id: adminId }, select: { universityId: true } });
+    if (!admin?.universityId) throw APIError.BadRequest("No university assigned to this admin");
 
     const drafts = await prisma.book.findMany({
-        where: { universityId: university.id, status: "draft" },
+        where: { universityId: admin.universityId, status: "draft" },
         orderBy: { createdAt: "desc" },
     });
     APIResponse.success(res, "Drafts retrieved successfully", { drafts }, 200);
@@ -269,11 +269,11 @@ export const publishBook = async (req: Request, res: Response) => {
     const adminId = req.admin?.id;
     if (!adminId) throw APIError.Unauthorized("Unauthorized");
 
-    const university = await prisma.university.findFirst({ where: { adminId }, select: { id: true } });
-    if (!university) throw APIError.BadRequest("No university assigned to this admin");
+    const admin = await prisma.admin.findUnique({ where: { id: adminId }, select: { universityId: true } });
+    if (!admin?.universityId) throw APIError.BadRequest("No university assigned to this admin");
 
     const book = await prisma.book.findFirst({
-        where: { id: req.params.id, universityId: university.id },
+        where: { id: req.params.id, universityId: admin.universityId },
         select: { id: true },
     });
     if (!book) throw APIError.NotFound("Book not found");
