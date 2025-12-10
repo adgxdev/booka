@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Order, OrderItem, FulfillmentType, OrderStatus, PaymentStatus } from "../../generated/prisma";
+import { Order, OrderItem } from "../../generated/prisma/client";
 
 // Zod schemas for validation
 export const CreateOrderSchema = z.object({

@@ -1,6 +1,7 @@
 import prisma from "../configs/prisma";
 import { logger } from "../utils/logger";
 import { APIError } from "../utils/APIError";
+import { Order } from "../generated/prisma/client";
 
 // Generate daily reports for all universities
 export async function generateDailyReportsJob() {
@@ -40,7 +41,7 @@ export async function generateDailyReportsJob() {
             }
 
             // Get all orders scheduled for yesterday
-            const orders = await prisma.order.findMany({
+            const orders: Order[] = await prisma.order.findMany({
                 where: {
                     universityId: university.id,
                     fulfillmentDate: {
@@ -76,7 +77,7 @@ export async function generateDailyReportsJob() {
 
             // Agent performance
             const agentStats = new Map<string, { agentId: string, agentName: string, commissions: number, successfulDeliveries: number, successfulPickups: number }>();
-            
+
             for (const order of orders) {
                 if (order.agentId && order.agent) {
                     const existing = agentStats.get(order.agentId) || {
@@ -104,7 +105,7 @@ export async function generateDailyReportsJob() {
 
             // Top 10 books
             const bookStats = new Map<string, { bookId: string, bookTitle: string, orderCount: number }>();
-            
+
             for (const order of orders) {
                 for (const item of order.items) {
                     const existing = bookStats.get(item.bookId) || {
