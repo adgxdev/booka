@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import prisma from "../../configs/prisma";
 import { APIError } from "../../utils/APIError";
 import { APIResponse } from "../../utils/APIResponse";
+import { DailyReport } from "../../generated/prisma/client";
 
 // Get daily report for a specific date
 export const getDailyReport = async (req: Request, res: Response, next: NextFunction) => {
@@ -199,7 +200,7 @@ export const listDailyReports = async (req: Request, res: Response, next: NextFu
     const totalPages = Math.ceil(totalReports / itemsPerPage);
 
     return APIResponse.success(res, "Daily reports list retrieved successfully", {
-        items: reports.map(r => ({
+        items: (reports as DailyReport[]).map(r => ({
             date: r.reportDate.toISOString().split('T')[0],
             totalOrders: r.totalOrdersScheduled,
             completedPickups: r.completedPickups,
@@ -253,7 +254,7 @@ export const listWeeklyReports = async (req: Request, res: Response, next: NextF
     const totalPages = Math.ceil(totalReports / itemsPerPage);
 
     return APIResponse.success(res, "Weekly reports list retrieved successfully", {
-        items: reports.map(r => ({
+        items: (reports as DailyReport[]).map(r => ({
             weekStart: r.weekStartDate.toISOString().split('T')[0],
             weekEnd: r.weekEndDate.toISOString().split('T')[0],
             totalOrders: r.totalOrdersScheduled,
@@ -307,7 +308,7 @@ export const listMonthlyReports = async (req: Request, res: Response, next: Next
     const totalPages = Math.ceil(totalReports / itemsPerPage);
 
     return APIResponse.success(res, "Monthly reports list retrieved successfully", {
-        items: reports.map(r => ({
+        items: (reports as DailyReport[]).map(r => ({
             month: r.reportMonth.toISOString().split('T')[0].substring(0, 7),
             totalOrders: r.totalOrdersScheduled,
             completedPickups: r.completedPickups,
@@ -327,7 +328,7 @@ export const listMonthlyReports = async (req: Request, res: Response, next: Next
 // Get daily report for any university by ID (superAdmin only)
 export const getSuperAdminDailyReport = async (req: Request, res: Response, next: NextFunction) => {
     const { universityId, date } = req.body;
-    
+
     if (!universityId) {
         throw APIError.BadRequest("University ID is required");
     }
@@ -394,7 +395,7 @@ export const getSuperAdminDailyReport = async (req: Request, res: Response, next
 // Get weekly report for any university by ID (superAdmin only)
 export const getSuperAdminWeeklyReport = async (req: Request, res: Response, next: NextFunction) => {
     const { universityId, week } = req.body;
-    
+
     if (!universityId) {
         throw APIError.BadRequest("University ID is required");
     }
@@ -462,7 +463,7 @@ export const getSuperAdminWeeklyReport = async (req: Request, res: Response, nex
 // Get monthly report for any university by ID (superAdmin only)
 export const getSuperAdminMonthlyReport = async (req: Request, res: Response, next: NextFunction) => {
     const { universityId, month } = req.body;
-    
+
     if (!universityId) {
         throw APIError.BadRequest("University ID is required");
     }
@@ -529,7 +530,7 @@ export const getSuperAdminMonthlyReport = async (req: Request, res: Response, ne
 // List all daily reports for any university by ID (superAdmin only)
 export const listSuperAdminDailyReports = async (req: Request, res: Response, next: NextFunction) => {
     const { universityId } = req.body;
-    
+
     if (!universityId) {
         throw APIError.BadRequest("University ID is required");
     }
@@ -577,7 +578,7 @@ export const listSuperAdminDailyReports = async (req: Request, res: Response, ne
             id: university.id,
             name: university.name
         },
-        items: reports.map(r => ({
+        items: (reports as DailyReport[]).map(r => ({
             date: r.reportDate.toISOString().split('T')[0],
             totalOrders: r.totalOrdersScheduled,
             completedPickups: r.completedPickups,
@@ -597,7 +598,7 @@ export const listSuperAdminDailyReports = async (req: Request, res: Response, ne
 // List all weekly reports for any university
 export const listSuperAdminWeeklyReports = async (req: Request, res: Response, next: NextFunction) => {
     const { universityId } = req.body;
-    
+
     if (!universityId) {
         throw APIError.BadRequest("University ID is required");
     }
@@ -646,7 +647,7 @@ export const listSuperAdminWeeklyReports = async (req: Request, res: Response, n
             id: university.id,
             name: university.name
         },
-        items: reports.map(r => ({
+        items: (reports as DailyReport[]).map(r => ({
             weekStart: r.weekStartDate.toISOString().split('T')[0],
             weekEnd: r.weekEndDate.toISOString().split('T')[0],
             totalOrders: r.totalOrdersScheduled,
@@ -667,7 +668,7 @@ export const listSuperAdminWeeklyReports = async (req: Request, res: Response, n
 // List all monthly reports for any university 
 export const listSuperAdminMonthlyReports = async (req: Request, res: Response, next: NextFunction) => {
     const { universityId } = req.body;
-    
+
     if (!universityId) {
         throw APIError.BadRequest("University ID is required");
     }
@@ -715,7 +716,7 @@ export const listSuperAdminMonthlyReports = async (req: Request, res: Response, 
             id: university.id,
             name: university.name
         },
-        items: reports.map(r => ({
+        items: (reports as DailyReport[]).map(r => ({
             month: r.reportMonth.toISOString().split('T')[0].substring(0, 7),
             totalOrders: r.totalOrdersScheduled,
             completedPickups: r.completedPickups,

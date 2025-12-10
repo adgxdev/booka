@@ -1,21 +1,22 @@
 import prisma from "../configs/prisma";
 import { logger } from "../utils/logger";
 import { APIError } from "../utils/APIError";
+import { Order } from "../generated/prisma/client";
 
 // Generate monthly reports for all universities (runs on the last day of each month)
 export async function generateMonthlyReportsJob() {
     try {
         // Get last month's date range (1st to last day of month)
         const today = new Date();
-        
+
         // Get first day of last month
         const reportMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
         reportMonth.setHours(0, 0, 0, 0);
-        
+
         // Month start (1st of last month)
         const monthStart = new Date(reportMonth);
         monthStart.setHours(0, 0, 0, 0);
-        
+
         // Month end (last day of last month at 23:59:59)
         const lastDayOfMonth = new Date(reportMonth.getFullYear(), reportMonth.getMonth() + 1, 0);
         const monthEnd = new Date(lastDayOfMonth.getFullYear(), lastDayOfMonth.getMonth(), lastDayOfMonth.getDate(), 23, 59, 59, 999);
@@ -43,7 +44,7 @@ export async function generateMonthlyReportsJob() {
             }
 
             // Get all orders for last month (1st to last day)
-            const orders = await prisma.order.findMany({
+            const orders: Order[] = await prisma.order.findMany({
                 where: {
                     universityId: university.id,
                     fulfillmentDate: {
@@ -79,7 +80,7 @@ export async function generateMonthlyReportsJob() {
 
             // Agent performance
             const agentStats = new Map<string, { agentId: string, agentName: string, commissions: number, successfulDeliveries: number, successfulPickups: number }>();
-            
+
             for (const order of orders) {
                 if (order.agentId && order.agent) {
                     const existing = agentStats.get(order.agentId) || {
@@ -107,7 +108,7 @@ export async function generateMonthlyReportsJob() {
 
             // Top 10 books
             const bookStats = new Map<string, { bookId: string, bookTitle: string, orderCount: number }>();
-            
+
             for (const order of orders) {
                 for (const item of order.items) {
                     const existing = bookStats.get(item.bookId) || {
