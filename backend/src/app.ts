@@ -3,6 +3,7 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import adminRouter from "./modules/admins";
+import { createDefaultAdmin } from "./modules/admins/admin.controller";
 import agentsRouter from "./modules/agents";
 import booksRouter from "./modules/books";
 import configsRouter from "./modules/configs"
@@ -69,6 +70,8 @@ app.use(errorHandler);
 
 // Initialize cron jobs
 if (process.env.NODE_ENV !== "test") {
+  // Ensure default admin exists before starting background jobs
+  createDefaultAdmin().catch(err => console.error('createDefaultAdmin error:', err));
   initializeCronJobs();
 }
 
