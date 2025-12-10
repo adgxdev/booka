@@ -8,7 +8,7 @@ import { setCookie } from "../../utils/cookies/setCookies";
 import { clearAuthCookies } from "../../utils/cookies/clearAuthCookies";
 import { AdminJwtPayload, CreateAdminDTO } from "./admin.type";
 import { APIError } from "../../utils/APIError";
-import { APIResponse } from "../../utils/APIResponse"; 
+import { APIResponse } from "../../utils/APIResponse";
 
 
 //Create admin
@@ -119,8 +119,8 @@ export const loginAdmin = async (req: Request, res: Response) => {
     setCookie(res, "adminAccessToken", accessToken);
     setCookie(res, "adminRefreshToken", refreshToken);
 
-    const loggedInAdminDetails = { 
-        id: admin.id, 
+    const loggedInAdminDetails = {
+        id: admin.id,
         name: admin.name,
         email: admin.email,
         role: admin.role
@@ -250,7 +250,7 @@ export const getPersonalAdminInfo = async (req: any, res: Response, next: NextFu
         throw APIError.Unauthorized("Unauthorized");
     }
 
-    const admin = await prisma.admin.findUnique({ 
+    const admin = await prisma.admin.findUnique({
         where: { id: adminId },
         select: {
             id: true,
@@ -302,7 +302,7 @@ export const getAllAdmins = async (req: Request, res: Response) => {
 export const getAdminById = async (req: Request, res: Response) => {
     const { adminId } = req.params;
 
-    const admin = await prisma.admin.findUnique({ 
+    const admin = await prisma.admin.findUnique({
         where: { id: adminId },
         select: {
             id: true,
