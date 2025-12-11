@@ -11,6 +11,37 @@ import { APIError } from "../../utils/APIError";
 import { APIResponse } from "../../utils/APIResponse";
 
 
+//Create Default Admin
+export const createDefaultAdmin = async () => {
+    const defaultAdminEmail = "bookaadmin@gmail.com";
+    const defaultAdminPassword = "BookaAdmin123";
+    const defaultAdminName = "Default Super Admin";
+    const defaultAdminPhone = "1234567890";
+
+    const existingAdmin = await prisma.admin.findUnique({
+        where: { email: defaultAdminEmail }
+    });
+
+    if (existingAdmin) {
+        console.log("Default admin already exists.");
+        return;
+    }
+
+    const hashedPassword = await bcrypt.hash(defaultAdminPassword, 10);
+
+        await prisma.admin.create({
+            data: {
+                name: defaultAdminName,
+                email: defaultAdminEmail,
+                password: hashedPassword,
+                phoneNumber: defaultAdminPhone,
+                role: "super"
+            }
+        });
+
+    console.log(`Default admin created with email: ${defaultAdminEmail}`);
+}
+
 //Create admin
 export const createAdmin = async (req: Request, res: Response) => {
     const body = CreateAdminDTO.parse(req.body);
