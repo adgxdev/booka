@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { boldFont } from "./font";
 import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "@/context/AuthContext";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -75,7 +76,7 @@ export default function RootLayout({
       <body
         className={`${poppins.className} ${boldFont.variable} antialiased`}
       >
-        {children}
+        <AuthProvider>{children}</AuthProvider>
         <Toaster position="top-center" toastOptions={{
             duration: 3000,
             style: {
