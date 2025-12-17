@@ -3,6 +3,7 @@ import prisma from "../../configs/prisma";
 import { NextFunction, Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { setCookie } from "../../utils/cookies/setCookies";
+import { clearAuthCookies } from "../../utils/cookies/clearAuthCookies";
 import { CreateUserDTO, UpdateUserDTO, UserJwtPayload } from "./user.type";
 import { APIError } from "../../utils/APIError";
 import { APIResponse } from "../../utils/APIResponse";
@@ -80,30 +81,8 @@ export const loginUser = async (req: Request, res: Response) => {
         throw APIError.BadRequest("Invalid email or password");
     }
 
-    const isProduction = process.env.NODE_ENV === "production";
-
-    // Clear admin and usercookies before setting new ones
-    res.clearCookie("adminAccessToken", {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "lax"
-    });
-    res.clearCookie("adminRefreshToken", {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "lax"
-    });
-
-    res.clearCookie("userAccessToken", {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "lax"
-    });
-    res.clearCookie("userRefreshToken", {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "lax"
-    });
+    // Clear all auth cookies before setting new ones
+    clearAuthCookies(res);
 
     const accessToken = jwt.sign(
         {
@@ -173,21 +152,7 @@ export const refreshUserToken = async (req: Request, res: Response) => {
 
 //Logout User
 export const logoutUser = async (req: Request, res: Response, next: NextFunction) => {
-    const isProduction = process.env.NODE_ENV === "production";
-
-    // Clear the cookies with consistent settings
-    res.clearCookie("userAccessToken", {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "lax"
-    });
-
-    res.clearCookie("userRefreshToken", {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "lax"
-    });
-
+    clearAuthCookies(res);
     return APIResponse.success(res, "Logged out successfully");
 }
 

@@ -8,36 +8,44 @@ datasource db {
 }
 
 model Admin {
-  id           String       @id @default(uuid())
+  id           String      @id @default(uuid())
   name         String
-  email        String       @unique
+  email        String      @unique
   phoneNumber  String
-  role         AdminRole    @default(manager)
+  role         AdminRole   @default(manager)
   password     String
   commissions  Int?
   lastUpdate   DateTime?
-  createdAt    DateTime     @default(now()) @db.Timestamptz(6)
-  updatedAt    DateTime     @updatedAt @db.Timestamptz(6)
+  universityId String?
+  createdAt    DateTime    @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime    @updatedAt @db.Timestamptz(6)
   AuditLog     AuditLog[]
-  universities University[] @relation("AdminUniversities")
+  university   University? @relation("AdminUniversity", fields: [universityId], references: [id])
   books        Book[]
 }
 
 model University {
-  id        String     @id @default(uuid())
-  name      String
-  state     String
-  city      String
-  slug      String     @unique
-  logoUrl     String
-  logoFileId  String
-  AuditLog  AuditLog[]
-  adminId   String?
-  admin     Admin?     @relation("AdminUniversities", fields: [adminId], references: [id])
-  users     User[]
-  books     Book[]
-  createdAt DateTime   @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime   @updatedAt @db.Timestamptz(6)
+  id                  String          @id @default(uuid())
+  name                String
+  state               String
+  city                String
+  slug                String          @unique
+  logoUrl             String
+  logoFileId          String
+  maxAgents           Int             @default(50)
+  signedUpAgentsCount Int             @default(0)
+  pickupLocations     String[]        @default([])
+  AuditLog            AuditLog[]
+  admins              Admin[]         @relation("AdminUniversity")
+  users               User[]
+  books               Book[]
+  orders              Order[]
+  deliveryAgents      DeliveryAgent[]
+  dailyReports        DailyReport[]
+  weeklyReports       WeeklyReport[]
+  monthlyReports      MonthlyReport[]
+  createdAt           DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt           DateTime        @updatedAt @db.Timestamptz(6)
 }
 
 model User {
@@ -50,10 +58,32 @@ model User {
   password     String
   universityId String
   university   University @relation(fields: [universityId], references: [id])
+  orders       Order[]
   createdAt    DateTime   @default(now()) @db.Timestamptz(6)
   updatedAt    DateTime   @updatedAt @db.Timestamptz(6)
 }
- 
+
+model DeliveryAgent {
+  id                 String      @id @default(uuid())
+  name               String
+  email              String      @unique
+  phoneNumber        String
+  password           String
+  universityId       String
+  assignedZones      String[]    @default([])
+  totalCommissions   Float       @default(0)
+  pendingOrdersCount Int         @default(0)
+  status             AgentStatus @default(pending)
+  studentIdUrl       String?
+  ninSlipUrl         String?
+  idempotencyKey     String?     @unique
+  createdAt          DateTime    @default(now()) @db.Timestamptz(6)
+  updatedAt          DateTime    @updatedAt @db.Timestamptz(6)
+
+  university University @relation(fields: [universityId], references: [id])
+  orders     Order[]
+}
+
 model Book {
   id           String     @id @default(uuid())
   title        String
@@ -62,6 +92,7 @@ model Book {
   price        Float      @default(0)
   quantity     Int        @default(0)
   lowAlert     Int        @default(0)
+  orderCount   Int        @default(0)
   imageUrl     String
   imageFileId  String
   status       BookStatus @default(draft)
@@ -70,8 +101,60 @@ model Book {
   createdAt    DateTime   @default(now()) @db.Timestamptz(6)
   updatedAt    DateTime   @updatedAt @db.Timestamptz(6)
 
-  university   University @relation(fields: [universityId], references: [id])
-  admin        Admin      @relation(fields: [adminId], references: [id])
+  university University  @relation(fields: [universityId], references: [id])
+  admin      Admin       @relation(fields: [adminId], references: [id])
+  orderItems OrderItem[]
+}
+
+model Order {
+  id                String          @id @default(uuid())
+  userId            String
+  universityId      String
+  agentId           String?
+  booksTotal        Float
+  serviceFee        Float
+  agentCommission   Float           @default(0)
+  managerCommission Float           @default(0)
+  totalPrice        Float
+  status            OrderStatus     @default(pending)
+  paymentStatus     PaymentStatus   @default(pending)
+  paymentReference  String?         @unique
+  paystackReference String?         @unique
+  idempotencyKey    String          @unique
+  fulfillmentType   FulfillmentType
+  fulfillmentDate   DateTime
+  timeSlot          String
+  slotExpired       Boolean         @default(false)
+  slotExpiredAt     DateTime?
+  deliveryAddress   String?
+  pickupLocation    String?
+  qrCode            String?         @unique
+  qrCodeScannedAt   DateTime?
+  paidAt            DateTime?
+  rescheduledCount  Int             @default(0)
+  lastRescheduledAt DateTime?
+  reschedulingFee   Float           @default(0)
+  createdAt         DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime        @updatedAt @db.Timestamptz(6)
+
+  user       User           @relation(fields: [userId], references: [id])
+  university University     @relation(fields: [universityId], references: [id])
+  agent      DeliveryAgent? @relation(fields: [agentId], references: [id])
+  items      OrderItem[]
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String
+  bookId    String
+  bookTitle String
+  bookPrice Float
+  quantity  Int
+  subtotal  Float
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  book  Book  @relation(fields: [bookId], references: [id])
 }
 
 model AuditLog {
@@ -81,7 +164,7 @@ model AuditLog {
   action       String
   adminId      String?
   level        AuduitLogLevel @default(info)
-  requestId    String
+  requestId    String?
   timestamp    DateTime       @default(now()) @db.Timestamptz(6)
   type         AuditLogType
   universityId String?
@@ -97,6 +180,86 @@ model Waitlist {
   parentCode   String?
   referredBy   Waitlist?  @relation("WaitlistReferrals", fields: [parentCode], references: [referralCode])
   referrals    Waitlist[] @relation("WaitlistReferrals")
+}
+
+model Config {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedBy   String?
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(6)
+}
+
+model DailyReport {
+  id                   String   @id @default(uuid())
+  universityId         String
+  reportDate           DateTime @db.Date
+  totalOrdersScheduled Int      @default(0)
+  completedPickups     Int      @default(0)
+  completedDeliveries  Int      @default(0)
+  missedSlots          Int      @default(0)
+  reschedules          Int      @default(0)
+  totalOrderValue      Float    @default(0)
+  totalServiceFees     Float    @default(0)
+  totalRescheduleFees  Float    @default(0)
+  agentPerformance     Json // Array of {agentId, agentName, commissions, successfulDeliveries, successfulPickups}
+  topBooks             Json // Array of {bookId, bookTitle, orderCount}
+  createdAt            DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt            DateTime @updatedAt @db.Timestamptz(6)
+
+  university University @relation(fields: [universityId], references: [id])
+
+  @@unique([universityId, reportDate])
+  @@index([reportDate])
+}
+
+model WeeklyReport {
+  id                   String   @id @default(uuid())
+  universityId         String
+  weekStartDate        DateTime @db.Date
+  weekEndDate          DateTime @db.Date
+  totalOrdersScheduled Int      @default(0)
+  completedPickups     Int      @default(0)
+  completedDeliveries  Int      @default(0)
+  missedSlots          Int      @default(0)
+  reschedules          Int      @default(0)
+  totalOrderValue      Float    @default(0)
+  totalServiceFees     Float    @default(0)
+  totalRescheduleFees  Float    @default(0)
+  agentPerformance     Json
+  topBooks             Json
+  createdAt            DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt            DateTime @updatedAt @db.Timestamptz(6)
+
+  university University @relation(fields: [universityId], references: [id])
+
+  @@unique([universityId, weekStartDate])
+  @@index([weekStartDate])
+}
+
+model MonthlyReport {
+  id                   String   @id @default(uuid())
+  universityId         String
+  reportMonth          DateTime @db.Date
+  totalOrdersScheduled Int      @default(0)
+  completedPickups     Int      @default(0)
+  completedDeliveries  Int      @default(0)
+  missedSlots          Int      @default(0)
+  reschedules          Int      @default(0)
+  totalOrderValue      Float    @default(0)
+  totalServiceFees     Float    @default(0)
+  totalRescheduleFees  Float    @default(0)
+  agentPerformance     Json
+  topBooks             Json
+  createdAt            DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt            DateTime @updatedAt @db.Timestamptz(6)
+
+  university University @relation(fields: [universityId], references: [id])
+
+  @@unique([universityId, reportMonth])
+  @@index([reportMonth])
 }
 
 enum AdminRole {
@@ -129,4 +292,32 @@ enum AuduitLogLevel {
 enum BookStatus {
   draft
   published
+}
+
+enum OrderStatus {
+  pending
+  confirmed
+  purchased
+  ready
+  completed
+  cancelled
+}
+
+enum PaymentStatus {
+  pending
+  processing
+  success
+  failed
+  refunded
+}
+
+enum FulfillmentType {
+  delivery
+  pickup
+}
+
+enum AgentStatus {
+  pending
+  approved
+  rejected
 }

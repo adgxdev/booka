@@ -14,6 +14,8 @@ body {
 @theme {
   --color-blue: #00C6FF;
   --color-yellow: #FFD166;
+  --color-dblue: #1F6193;
+  --color-bg: #0A192F;
 }
 
 button {

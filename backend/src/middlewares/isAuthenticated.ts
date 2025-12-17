@@ -3,6 +3,7 @@ import jwt, { TokenExpiredError } from "jsonwebtoken";
 import prisma from "../configs/prisma";
 import { AdminJwtPayload, SafeAdmin, AdminRole } from "../modules/admins/admin.type";
 import { SafeUser } from "../modules/users/user.type";
+import { SafeDeliveryAgent, AgentJwtPayload } from "../modules/agents/agent.type";
 
 // Shared core verifier
 const verifyAdmin = async (
@@ -116,6 +117,61 @@ export const isUserAuthenticated = async (
     } catch (err: any) {
         if (err instanceof TokenExpiredError) {
             return res.status(401).json({ message: "User token expired", code: "TOKEN_EXPIRED" });
+        }
+        return res.status(401).json({ message: "Unauthorized: invalid or malformed token" });
+    }
+};
+
+// Agent authentication (access token)
+export const isAgentAuthenticated = async (
+    req: Request & { agent?: SafeDeliveryAgent },
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const bearer = req.headers.authorization;
+        const headerToken = bearer && bearer.startsWith("Bearer ") ? bearer.slice(7) : undefined;
+        const token = req.cookies["agentAccessToken"] || headerToken;
+
+        if (!token) {
+            return res.status(401).json({ message: "Unauthorized: agent token missing" });
+        }
+
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as AgentJwtPayload;
+        if (!decoded.id || !decoded.universityId) {
+            return res.status(401).json({ message: "Unauthorized: invalid token" });
+        }
+
+        const agent = await prisma.deliveryAgent.findUnique({
+            where: { id: decoded.id },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                phoneNumber: true,
+                universityId: true,
+                assignedZones: true,
+                totalCommissions: true,
+                status: true,
+                createdAt: true,
+                updatedAt: true
+            }
+        });
+
+        if (!agent) {
+            return res.status(401).json({ message: "Unauthorized: agent not found" });
+        }
+
+        // Only approved agents can access authenticated routes
+        if (agent.status !== "approved") {
+            return res.status(403).json({ message: "Forbidden: agent account not approved" });
+        }
+
+        req.agent = agent;
+        return next();
+    } catch (err: any) {
+        if (err instanceof TokenExpiredError) {
+            return res.status(401).json({ message: "Agent token expired", code: "TOKEN_EXPIRED" });
         }
         return res.status(401).json({ message: "Unauthorized: invalid or malformed token" });
     }

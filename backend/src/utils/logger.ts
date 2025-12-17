@@ -1,6 +1,7 @@
 import winston from "winston";
 import prisma from "../configs/prisma";
-import { AuditLogType, AuduitLogLevel, Entity } from "../generated/prisma/enums";
+import { AuditLogType, AuduitLogLevel, Entity } from "../generated/prisma/client";
+//import { Entity } from "../generated/prisma/enums";
 // import { AuditLogType, AuduitLogLevel, Entity } from "";
 // import { AuditLogType, AuduitLogLevel, Entity } from "";
 
@@ -41,7 +42,7 @@ export const logger = {
                 entityId: meta.entityId ?? null,
                 type: meta.type ?? "create",
                 level: "info",
-                requestId: meta.requestId as string
+                requestId: meta.requestId ?? null
             }
         }).catch((e) => {
             winstonLogger.error("Failed to save audit log (info)", { error: e.message, stack: e.stack });
@@ -60,7 +61,7 @@ export const logger = {
                 entityId: meta.entityId ?? null,
                 type: meta.type ?? "update",
                 level: "warning",
-                requestId: meta.requestId as string
+                requestId: meta.requestId ?? null
             }
         }).catch((e) => {
             winstonLogger.error("Failed to save audit log (warn)", { error: e.message, stack: e.stack });
@@ -79,7 +80,7 @@ export const logger = {
                 entityId: meta.entityId ?? null,
                 type: meta.type ?? "create",
                 level: "error",
-                requestId: meta.requestId as string
+                requestId: meta.requestId ?? null
             }
         }).catch((e) => {
             winstonLogger.error("Failed to save audit log (error)", { error: e.message, stack: e.stack });

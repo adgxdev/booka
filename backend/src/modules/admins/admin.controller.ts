@@ -5,10 +5,42 @@ import { generateRandomPassword } from "../../utils/helper";
 import { sendCustomEmail, getAdminWelcomeEmail } from '../../utils/send-email';
 import bcrypt from "bcryptjs";
 import { setCookie } from "../../utils/cookies/setCookies";
+import { clearAuthCookies } from "../../utils/cookies/clearAuthCookies";
 import { AdminJwtPayload, CreateAdminDTO } from "./admin.type";
 import { APIError } from "../../utils/APIError";
-import { APIResponse } from "../../utils/APIResponse"; 
+import { APIResponse } from "../../utils/APIResponse";
 
+
+//Create Default Admin
+export const createDefaultAdmin = async () => {
+    const defaultAdminEmail = "bookaadmin@gmail.com";
+    const defaultAdminPassword = "BookaAdmin123";
+    const defaultAdminName = "Default Super Admin";
+    const defaultAdminPhone = "1234567890";
+
+    const existingAdmin = await prisma.admin.findUnique({
+        where: { email: defaultAdminEmail }
+    });
+
+    if (existingAdmin) {
+        console.log("Default admin already exists.");
+        return;
+    }
+
+    const hashedPassword = await bcrypt.hash(defaultAdminPassword, 10);
+
+        await prisma.admin.create({
+            data: {
+                name: defaultAdminName,
+                email: defaultAdminEmail,
+                password: hashedPassword,
+                phoneNumber: defaultAdminPhone,
+                role: "super"
+            }
+        });
+
+    console.log(`Default admin created with email: ${defaultAdminEmail}`);
+}
 
 //Create admin
 export const createAdmin = async (req: Request, res: Response) => {
@@ -39,7 +71,13 @@ export const createAdmin = async (req: Request, res: Response) => {
         });
 
         try {
-            const emailContent = getAdminWelcomeEmail({ full_name: name, email, password });
+            // Get admin app URL from config
+            const adminAppConfig = await prisma.config.findUnique({
+                where: { key: "admin_app_url" }
+            });
+            const adminAppUrl = adminAppConfig?.value || 'https://admin.booka.app';
+
+            const emailContent = getAdminWelcomeEmail({ full_name: name, email, password, adminAppUrl });
             await sendCustomEmail({ to: email, ...emailContent });
         } catch (err) {
             // Roll back: remove the just-created admin if email fails
@@ -88,30 +126,8 @@ export const loginAdmin = async (req: Request, res: Response) => {
         throw APIError.BadRequest("Invalid email or password");
     }
 
-    const isProduction = process.env.NODE_ENV === "production";
-
-    // Clear admin and usercookies before setting new ones
-    res.clearCookie("adminAccessToken", {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "lax"
-    });
-    res.clearCookie("adminRefreshToken", {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "lax"
-    });
-
-    res.clearCookie("userAccessToken", {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "lax"
-    });
-    res.clearCookie("userRefreshToken", {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "lax"
-    });
+    // Clear all auth cookies before setting new ones
+    clearAuthCookies(res);
 
     const accessToken = jwt.sign(
         {
@@ -134,8 +150,8 @@ export const loginAdmin = async (req: Request, res: Response) => {
     setCookie(res, "adminAccessToken", accessToken);
     setCookie(res, "adminRefreshToken", refreshToken);
 
-    const loggedInAdminDetails = { 
-        id: admin.id, 
+    const loggedInAdminDetails = {
+        id: admin.id,
         name: admin.name,
         email: admin.email,
         role: admin.role
@@ -222,21 +238,7 @@ export const refreshAdminToken = async (req: Request, res: Response) => {
 };
 
 export const logoutAdmin = async (req: Request, res: Response, next: NextFunction) => {
-    const isProduction = process.env.NODE_ENV === "production";
-
-    // Clear the cookies with consistent settings
-    res.clearCookie("adminAccessToken", {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "lax"
-    });
-
-    res.clearCookie("adminRefreshToken", {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "lax"
-    });
-
+    clearAuthCookies(res);
     return APIResponse.success(res, "Logged out successfully");
 }
 
@@ -279,7 +281,7 @@ export const getPersonalAdminInfo = async (req: any, res: Response, next: NextFu
         throw APIError.Unauthorized("Unauthorized");
     }
 
-    const admin = await prisma.admin.findUnique({ 
+    const admin = await prisma.admin.findUnique({
         where: { id: adminId },
         select: {
             id: true,
@@ -319,7 +321,7 @@ export const getAllAdmins = async (req: Request, res: Response) => {
             email: true,
             phoneNumber: true,
             role: true,
-            universities: true,
+            universityId: true,
             createdAt: true,
             updatedAt: true,
         }
@@ -331,7 +333,7 @@ export const getAllAdmins = async (req: Request, res: Response) => {
 export const getAdminById = async (req: Request, res: Response) => {
     const { adminId } = req.params;
 
-    const admin = await prisma.admin.findUnique({ 
+    const admin = await prisma.admin.findUnique({
         where: { id: adminId },
         select: {
             id: true,
@@ -339,7 +341,7 @@ export const getAdminById = async (req: Request, res: Response) => {
             email: true,
             phoneNumber: true,
             role: true,
-            universities: true,
+            universityId: true,
             createdAt: true,
             updatedAt: true,
         }

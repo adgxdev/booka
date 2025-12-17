@@ -1,6 +1,6 @@
 import express, { Router } from "express";
-import { assignAdminToUniversity, changeUniversityAdmin, createUniversity, deleteUniversity, deleteUniversityLogo, editUniversity, getUniversities, getUniversityAdmin, getUniversityById, removeUniversityAdmin, uploadUniversityLogo } from "./universities.controller";
-import { isSuperAuthenticated } from "../../middlewares/isAuthenticated";
+import { assignAdminToUniversity, changeUniversityAdmin, createUniversity, deleteUniversity, deleteUniversityLogo, editUniversity, getPickupLocations, getUniversities, getUniversityAdmin, getUniversityById, removeUniversityAdmin, updatePickupLocations, uploadUniversityLogo } from "./universities.controller";
+import { isSuperAuthenticated, isManagerAuthenticated } from "../../middlewares/isAuthenticated";
 
 const router: Router = express.Router();
 
@@ -15,5 +15,9 @@ router.put("/change-university-admin", isSuperAuthenticated, changeUniversityAdm
 router.put("/remove-university-admin", isSuperAuthenticated, removeUniversityAdmin);
 router.get("/get-university-admin/:universityId", isSuperAuthenticated, getUniversityAdmin);
 router.put("/assign-admin", isSuperAuthenticated, assignAdminToUniversity);
+
+//for Pickup Locations
+router.put("/update-pickup-locations", isManagerAuthenticated, updatePickupLocations);
+router.get("/get-pickup-locations", isManagerAuthenticated,  getPickupLocations);
 
 export default router;

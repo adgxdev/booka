@@ -39,7 +39,7 @@ export default function Navbar() {
             </header>
             {/* Mobile Menu Drawer */}
             <div
-                className={`fixed top-0 right-0 h-screen rounded-b-3xl w-full bg-[#0A192F] backdrop-blur-sm border-b border-white/10 shadow-xl transform transition-transform duration-300 md:hidden ${
+                className={`fixed top-0 right-0 h-dvh rounded-b-3xl w-full bg-[#0A192F] backdrop-blur-sm border-b border-white/10 shadow-xl transform transition-transform duration-300 md:hidden ${
                 open ? "translate-x-0" : "translate-x-full"
                 }`}
             >
@@ -52,7 +52,7 @@ export default function Navbar() {
                     </button>
                 </div>
 
-                <div className="flex flex-col items-start gap-6 text-sm px-6 font-medium mt-8">
+                <div className="flex flex-col items-start gap-6 text-sm px-6 font-medium mt-6">
                 <Link onClick={() => setOpen(false)} href="#" className="hover:text-blue duration-300">
                     About
                 </Link>
